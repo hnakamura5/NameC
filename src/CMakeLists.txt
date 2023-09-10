@@ -1,0 +1,10 @@
+add_library(NameC_Gen STATIC)
+
+target_sources(NameC_Gen PRIVATE
+    Gen.cpp
+    Gen/Exprs.cpp
+    Gen/Stmts.cpp
+    Gen/Types.cpp
+)
+
+target_link_libraries(NameC_Gen PRIVATE basic_configs)
