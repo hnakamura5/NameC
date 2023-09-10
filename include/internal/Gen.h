@@ -1,33 +1,18 @@
 #ifndef NAMEC_GEN_H
 #define NAMEC_GEN_H
 
+#include "internal/Gen/Context.h"
+#include "internal/Gen/Decl.h"
 #include "internal/Gen/Exprs.h"
+#include "internal/Gen/File.h"
+#include "internal/Gen/Forwards.h"
+#include "internal/Gen/Scope.h"
 #include "internal/Gen/Stmts.h"
 #include "internal/Gen/Types.h"
 
-#include <memory>
-#include <string>
-#include <vector>
-
 namespace namec {
-class Module;
-class Context;
-class Scope;
-
-class Module {
-
-public:
-};
-
-class Context {
-
-public:
-};
-
-class Scope {
-
-public:
-};
+// standard way to cast a pointer
+template <typename T> T *cast(T *Ptr) { return dynamic_cast<T *>(Ptr); }
 
 } // namespace namec
 

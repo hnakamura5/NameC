@@ -1,0 +1,50 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.pdb
+*.out
+*.app
+
+# CMake Build Directories
+/build/*
+!/build/.git-keep
+/bin/*
+!/bin/.git-keep
+/lib/*
+!/lib/.git-keep
+/.vs
+/.vscode
+
+# test directories
+
+/test/sandbox/
+
+doc
+out

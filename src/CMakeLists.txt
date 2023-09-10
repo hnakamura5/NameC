@@ -5,6 +5,10 @@ target_sources(NameC_Gen PRIVATE
     Gen/Exprs.cpp
     Gen/Stmts.cpp
     Gen/Types.cpp
+    Gen/File.cpp
+    Gen/Decl.cpp
+    Gen/Scope.cpp
+    Gen/Context.cpp
 )
 
 target_link_libraries(NameC_Gen PRIVATE basic_configs)
