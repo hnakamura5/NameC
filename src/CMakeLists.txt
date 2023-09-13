@@ -8,6 +8,7 @@ target_sources(NameC_Gen PRIVATE
     Gen/File.cpp
     Gen/Decl.cpp
     Gen/Scope.cpp
+    Gen/Mixins.cpp
     Gen/Context.cpp
 )
 

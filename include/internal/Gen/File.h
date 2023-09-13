@@ -5,22 +5,46 @@
 #include <string>
 #include <vector>
 
+#include "internal/Gen/Directive.h"
+#include "internal/Gen/Emit.h"
+#include "internal/Gen/Forwards.h"
+#include "internal/Gen/MixIns.h"
+
 namespace namec {
-struct TopLevel;
 
-class File {
+// File TopLevel is split by if directives
+class TopLevel : public Emit,
+                 public DirectiveDefineMixin,
+                 public UbiquitousDeclStmtMixIn {
+  std::vector<Emit *> Entries;
+  std::vector<std::unique_ptr<TopLevel>> Children;
 
-  std::vector<std::unique_ptr<TopLevel>> TopLevels;
+protected:
+  void on_add_directive(Directive *D) override { Entries.push_back(D); }
+  void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
 
 public:
-  void include(std::string Path);
-  void include_sys(std::string Path);
-  void def_macro_flag(std::string Name);
-  void def_macro_value(std::string Name, std::string Value);
-  // TODO: void def_macro_func
-  void def_macro_undef(std::string Name);
+  TopLevel(Context &C) : UbiquitousDeclStmtMixIn(C) {}
+  TopLevel *add_get_new_top_level() {
+    Children.push_back(std::make_unique<TopLevel>());
+    return Children.back().get();
+  }
+  // Only in top level we can define/declare functions
+  FuncDecl *def_func(std::string Name, Type *RetTy,
+                     std::vector<VarDecl *> Params);
+  void emit(std::stringstream &SS) override;
+};
 
-  void emit(std::stringstream &SS);
+class File : public Emit {
+
+  Context &C;
+  std::unique_ptr<TopLevel> TheTopLevel;
+
+public:
+  File(Context &C) : C(C) { TheTopLevel.reset(new TopLevel(C)); }
+  virtual ~File() {}
+  TopLevel *get_top_level() { return TheTopLevel.get(); }
+  void emit(std::stringstream &SS) override;
 };
 
 } // namespace namec

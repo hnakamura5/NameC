@@ -7,7 +7,7 @@
 
 namespace namec {
 
-class Type : public CommentMixin {
+class Type : public Emit {
 
 public:
   virtual ~Type() = default;
@@ -34,6 +34,17 @@ class Named : public Type {
 public:
   Named(Decl *D) : D(D) {}
   Decl *get_decl() { return D; }
+  void emit(std::stringstream &SS) override;
+};
+
+class TypeAlias : public Type {
+  std::string Name;
+  Type *Ty;
+
+public:
+  TypeAlias(std::string Name, Type *Ty) : Name(Name), Ty(Ty) {}
+  std::string get_name() { return Name; }
+  Type *get_type() { return Ty; }
   void emit(std::stringstream &SS) override;
 };
 

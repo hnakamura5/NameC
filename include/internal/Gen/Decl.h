@@ -2,11 +2,11 @@
 #define NAMEC_GEN_DECL_H
 
 #include "Forwards.h"
-#include "internal/Gen/MixIns.h"
+#include "internal/Gen/Emit.h"
 
 namespace namec {
 
-class Decl : public CommentMixin {
+class Decl : public Emit {
 public:
   virtual ~Decl() = default;
   virtual void emit(std::stringstream &SS) = 0;
@@ -61,6 +61,15 @@ public:
   ArrayVarDecl(std::string Name, Type *Ty, std::vector<Expr *> Size, Expr *Init)
       : VarDecl(Name, Ty, Init), Size(Size) {}
   std::vector<Expr *> get_size() { return Size; }
+  void emit(std::stringstream &SS) override;
+};
+
+class TypedefDecl : public Decl {
+  TypeAlias *TA;
+
+public:
+  TypedefDecl(TypeAlias *TA) : TA(TA) {}
+  TypeAlias *get_type_alias() { return TA; }
   void emit(std::stringstream &SS) override;
 };
 

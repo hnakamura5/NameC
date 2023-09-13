@@ -1,13 +1,13 @@
 #ifndef NAMEC_GEN_EXPRS_H
 #define NAMEC_GEN_EXPRS_H
 
-#include "internal/Gen/Forwards.h"
-#include "internal/Gen/MixIns.h"
 #include "internal/Gen/Decl.h"
+#include "internal/Gen/Emit.h"
+#include "internal/Gen/Forwards.h"
 
 namespace namec {
 
-class Expr : public CommentMixin {
+class Expr : public Emit {
 
 public:
   virtual ~Expr() = default;

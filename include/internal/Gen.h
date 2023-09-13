@@ -3,6 +3,7 @@
 
 #include "internal/Gen/Context.h"
 #include "internal/Gen/Decl.h"
+#include "internal/Gen/Directive.h"
 #include "internal/Gen/Exprs.h"
 #include "internal/Gen/File.h"
 #include "internal/Gen/Forwards.h"
