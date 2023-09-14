@@ -9,7 +9,7 @@ namespace namec {
 class Decl : public Emit {
 public:
   virtual ~Decl() = default;
-  virtual void emit(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::stringstream &SS) = 0;
 };
 
 class RawDecl : public Decl {
@@ -18,7 +18,9 @@ class RawDecl : public Decl {
 public:
   RawDecl(std::string Val) : Val(Val) {}
   std::string get_val() { return Val; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class VarDecl : public Decl {
@@ -49,7 +51,9 @@ public:
   bool is_volatile() { return IsVolatile; }
   void set_restrict(bool IsRestrict) { this->IsRestrict = IsRestrict; }
   bool is_restrict() { return IsRestrict; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class ArrayVarDecl : public VarDecl {
@@ -61,7 +65,9 @@ public:
   ArrayVarDecl(std::string Name, Type *Ty, std::vector<Expr *> Size, Expr *Init)
       : VarDecl(Name, Ty, Init), Size(Size) {}
   std::vector<Expr *> get_size() { return Size; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class TypedefDecl : public Decl {
@@ -70,7 +76,9 @@ class TypedefDecl : public Decl {
 public:
   TypedefDecl(TypeAlias *TA) : TA(TA) {}
   TypeAlias *get_type_alias() { return TA; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class FuncDecl : public Decl {
@@ -94,7 +102,9 @@ public:
   bool is_extern() { return IsExtern; }
   void set_static(bool IsStatic) { this->IsStatic = IsStatic; }
   bool is_static() { return IsStatic; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class StructDecl : public Decl {
@@ -103,7 +113,9 @@ class StructDecl : public Decl {
 public:
   StructDecl(Struct *S) : S(S) {}
   Struct *get_struct() { return S; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class UnionDecl : public Decl {
@@ -112,7 +124,9 @@ class UnionDecl : public Decl {
 public:
   UnionDecl(Union *U) : U(U) {}
   Union *get_union() { return U; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class EnumDecl : public Decl {
@@ -121,7 +135,9 @@ class EnumDecl : public Decl {
 public:
   EnumDecl(Enum *E) : E(E) {}
   Enum *get_enum() { return E; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 } // namespace namec

@@ -23,6 +23,8 @@ class Union;
 class Enum;
 class Decl;
 class TopLevel;
+class Directive;
+class TypeAlias;
 } // namespace namec
 
 #endif // NAMEC_GEN_FORWARDS_H

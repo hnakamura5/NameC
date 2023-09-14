@@ -11,7 +11,7 @@ class Expr : public Emit {
 
 public:
   virtual ~Expr() = default;
-  virtual void emit(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::stringstream &SS) = 0;
 };
 
 class RawExpr : public Expr {
@@ -20,7 +20,9 @@ class RawExpr : public Expr {
 public:
   RawExpr(std::string Val) : Val(Val) {}
   std::string get_val() { return Val; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Variable : public Expr {
@@ -29,7 +31,9 @@ class Variable : public Expr {
 public:
   Variable(VarDecl *D) : D(D) {}
   VarDecl *get_decl() { return D; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Subscript : public Expr {
@@ -40,7 +44,9 @@ public:
   Subscript(Expr *Array, Expr *Index) : Array(Array), Index(Index) {}
   Expr *get_array() { return Array; }
   Expr *get_index() { return Index; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Call : public Expr {
@@ -51,7 +57,9 @@ public:
   Call(Expr *Callee, std::vector<Expr *> Args) : Callee(Callee), Args(Args) {}
   Expr *get_callee() { return Callee; }
   std::vector<Expr *> get_args() { return Args; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class UnaryOp : public Expr {
@@ -65,7 +73,9 @@ public:
   Expr *get_operand() { return Operand; }
   std::string get_op() { return Op; }
   bool is_prefix() { return IsPrefix; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class BinaryOp : public Expr {
@@ -78,7 +88,9 @@ public:
   Expr *get_lhs() { return LHS; }
   Expr *get_rhs() { return RHS; }
   std::string get_op() { return Op; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class TernaryOp : public Expr {
@@ -92,7 +104,9 @@ public:
   Expr *get_cond() { return Cond; }
   Expr *get_then() { return Then; }
   Expr *get_else() { return Else; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Cast : public Expr {
@@ -103,7 +117,9 @@ public:
   Cast(Type *Ty, Expr *Operand) : Ty(Ty), Operand(Operand) {}
   Type *get_type() { return Ty; }
   Expr *get_operand() { return Operand; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Paren : public Expr {
@@ -112,8 +128,12 @@ class Paren : public Expr {
 public:
   Paren(Expr *Inside) : Inside(Inside) {}
   Expr *get_inside() { return Inside; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
+
+// TODO: Initializer list.
 
 } // namespace namec
 

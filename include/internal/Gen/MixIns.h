@@ -1,6 +1,7 @@
 #ifndef NAMEC_GEN_MIXINS_H
 #define NAMEC_GEN_MIXINS_H
 
+#include "internal/Gen/Directive.h"
 #include "internal/Gen/Forwards.h"
 
 namespace namec {

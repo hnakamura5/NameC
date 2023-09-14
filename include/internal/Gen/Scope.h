@@ -29,7 +29,7 @@ protected:
 public:
   Scope(Context &C) : C(C), UbiquitousDeclStmtMixIn(C) {}
   virtual ~Scope() {}
-  virtual void emit(std::stringstream &SS);
+  virtual void emit_impl(std::stringstream &SS);
 
   // Stmt APIs
   RawStmt *stmt_raw(std::string Val) { return add(new RawStmt(C, Val)); }

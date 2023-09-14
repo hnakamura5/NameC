@@ -2,76 +2,21 @@
 
 using namespace namec;
 
-namespace {
+FuncDecl *TopLevel::def_func(std::string Name, Type *RetTy,
+                             std::vector<VarDecl *> Params) {
+  auto *F = C.decl_func(Name, RetTy, Params);
+  Entries.push_back(F);
+  return F;
+}
 
-struct TopLevel {
-  virtual void emit(std::stringstream &SS);
-};
+void TopLevel::emit_impl(std::stringstream &SS) {
+  for (auto *E : Entries) {
+    E->emit(SS);
+    SS << "\n";
+  }
+  for (auto &C : Children) {
+    C->emit(SS);
+  }
+}
 
-struct Include : public TopLevel {
-  bool IsSystem;
-  std::string Path;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct Define : public TopLevel {
-  std::string Name;
-  std::vector<std::string> Args;
-  std::optional<std::string> Value;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct Undef : public TopLevel {
-  std::string Name;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct IfDirective : public TopLevel {
-  std::string Condition;
-  std::vector<std::unique_ptr<TopLevel>> Then;
-  std::vector<std::unique_ptr<TopLevel>> Else;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct Struct : public TopLevel {
-  std::string Name;
-  std::vector<std::pair<Type *, std::string>> Members;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct Enum : public TopLevel {
-  std::string Name;
-  std::vector<std::pair<std::string, std::optional<Expr *>>> Members;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct Union : public TopLevel {
-  std::string Name;
-  std::vector<std::pair<Type *, std::string>> Members;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct Function : public TopLevel {
-  std::string Name;
-  std::vector<std::pair<Type *, std::string>> Args;
-  std::optional<Type *> RetType;
-  std::unique_ptr<Scope> Body;
-
-  void emit(std::stringstream &SS) override;
-};
-
-struct TypeDef : public TopLevel {
-  std::unique_ptr<Type> Defined;
-  Type *Type;
-
-  void emit(std::stringstream &SS) override;
-};
-
-} // namespace
+void File::emit_impl(std::stringstream &SS) { TheTopLevel->emit(SS); }

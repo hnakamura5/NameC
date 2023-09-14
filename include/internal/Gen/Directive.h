@@ -10,7 +10,7 @@ class Directive : public Emit {
 
 public:
   virtual ~Directive() = default;
-  virtual void emit(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::stringstream &SS) = 0;
 };
 
 class Include : public Directive {
@@ -19,7 +19,9 @@ class Include : public Directive {
 public:
   Include(std::string Path) : Path(Path) {}
   std::string get_path() { return Path; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class SystemInclude : public Directive {
@@ -28,7 +30,9 @@ class SystemInclude : public Directive {
 public:
   SystemInclude(std::string Path) : Path(Path) {}
   std::string get_path() { return Path; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Define : public Directive {
@@ -41,7 +45,9 @@ public:
   Define(std::string Name, std::string Value) : Name(Name), Value(Value) {}
   std::string get_name() { return Name; }
   std::string get_value() { return Value; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Undef : public Directive {
@@ -50,7 +56,9 @@ class Undef : public Directive {
 public:
   Undef(std::string Name) : Name(Name) {}
   std::string get_name() { return Name; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class Pragma : public Directive {
@@ -60,7 +68,9 @@ class Pragma : public Directive {
 public:
   Pragma(std::string Value) : Value(Value) {}
   std::string get_value() { return Value; }
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 class IfDirective : public Directive {
@@ -71,17 +81,32 @@ protected:
 
 public:
   IfDirective(std::string Cond);
-  std::string get_condition() { return Cond; }
-  TopLevel *get_then();
+  virtual ~IfDirective() = default;
+  std::string get_cond() { return Cond; }
+  TopLevel *get_then() { return Then.get(); }
+  TopLevel *get_else() { return Else.get(); }
   TopLevel *get_or_add_else();
-  void emit(std::stringstream &SS) override;
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
-class IfdefDirective : public IfDirective {
+class Ifdef : public IfDirective {
 
 public:
-  IfdefDirective(std::string Cond) : IfDirective(Cond) {}
-  void emit(std::stringstream &SS) override;
+  Ifdef(std::string Cond) : IfDirective(Cond) {}
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
+};
+
+class Ifndef : public IfDirective {
+
+public:
+  Ifndef(std::string Cond) : IfDirective(Cond) {}
+
+protected:
+  void emit_impl(std::stringstream &SS) override;
 };
 
 } // namespace namec

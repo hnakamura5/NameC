@@ -14,11 +14,13 @@ namespace namec {
 class Context {
   friend class File;
   friend class Scope;
+  friend class TopLevel;
+
   std::vector<std::unique_ptr<Scope>> Scopes;
   std::vector<std::unique_ptr<Decl>> Decls;
   std::vector<std::unique_ptr<Expr>> Exprs;
   std::vector<std::unique_ptr<Type>> Types;
-  std::unique_ptr<Type> VoidSingleton;
+  std::unique_ptr<Void> VoidSingleton;
   std::map<std::string, RawType *> RawTypeMap;
   std::map<Type *, Pointer *> PointerTypeMap;
   std::map<Type *, Array *> ArrayTypeMap;
@@ -76,7 +78,7 @@ private:
   // Expr APIs
 public:
   RawExpr *expr_raw(std::string Val) { return add_expr(new RawExpr(Val)); }
-  Variable *expr_var(std::string Name) { return add_expr(new Variable(Name)); }
+  Variable *expr_var(VarDecl *D) { return add_expr(new Variable(D)); }
   Subscript *expr_subscr(Expr *Base, Expr *Index) {
     return add_expr(new Subscript(Base, Index));
   }

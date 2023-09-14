@@ -9,6 +9,9 @@ class Emit {
   std::string CommentBefore;
   std::string CommentAfter;
 
+protected:
+  virtual void emit_impl(std::stringstream &SS) = 0;
+
 public:
   void set_comment_before(std::string CommentBefore) {
     this->CommentBefore = CommentBefore;
@@ -19,7 +22,15 @@ public:
   }
   std::string get_comment_after() { return CommentAfter; }
 
-  virtual void emit(std::stringstream &SS) = 0;
+  void emit(std::stringstream &SS) {
+    if (!CommentBefore.empty()) {
+      SS << "/* " << CommentBefore << " */";
+    }
+    emit_impl(SS);
+    if (!CommentAfter.empty()) {
+      SS << "/* " << CommentAfter << " */";
+    }
+  }
 };
 
 } // namespace namec
