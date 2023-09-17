@@ -9,7 +9,7 @@ FuncDecl *TopLevel::def_func(std::string Name, Type *RetTy,
   return F;
 }
 
-void TopLevel::emit_impl(std::stringstream &SS) {
+void TopLevel::emit_impl(std::ostream &SS) {
   for (auto *E : Entries) {
     E->emit(SS);
     SS << "\n";
@@ -19,4 +19,4 @@ void TopLevel::emit_impl(std::stringstream &SS) {
   }
 }
 
-void File::emit_impl(std::stringstream &SS) { TheTopLevel->emit(SS); }
+void File::emit_impl(std::ostream &SS) { TheTopLevel->emit(SS); }

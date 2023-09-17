@@ -1,6 +1,7 @@
 #ifndef NAMEC_GEN_FORWARDS_H
 #define NAMEC_GEN_FORWARDS_H
 
+#include <iosfwd>
 #include <map>
 #include <memory>
 #include <optional>

@@ -2,66 +2,76 @@
 
 using namespace namec;
 
-void RawStmt::emit_impl(std::stringstream &SS) { SS << get_val(); }
+void RawStmt::emit_impl(std::ostream &SS) { SS << get_val(); }
 
-void DeclStmt::emit_impl(std::stringstream &SS) {
+void DeclStmt::emit_impl(std::ostream &SS) {
   get_decl()->emit(SS);
   SS << ";";
 }
 
-void If::emit_impl(std::stringstream &SS) {
-  SS << "if (";
+void IfStmt::emit_impl(std::ostream &SS) {
+  SS << "if(";
   get_cond()->emit(SS);
-  SS << ") {";
+  SS << "){";
   get_then()->emit(SS);
-  SS << " }";
+  SS << "}";
   if (get_else()) {
-    SS << " else {";
+    SS << "else{";
     get_else()->emit(SS);
-    SS << " }";
+    SS << "}";
   }
 }
 
-void While::emit_impl(std::stringstream &SS) {
-  SS << "while (";
+void WhileStmt::emit_impl(std::ostream &SS) {
+  SS << "while(";
   get_cond()->emit(SS);
-  SS << ") {";
+  SS << "){";
   get_body()->emit(SS);
-  SS << " }";
+  SS << "}";
 }
 
-void For::emit_impl(std::stringstream &SS) {
-  SS << "for (";
-  get_init()->emit(SS);
-  SS << "; ";
-  get_cond()->emit(SS);
-  SS << "; ";
-  get_step()->emit(SS);
-  SS << ") {";
+void ForStmt::emit_impl(std::ostream &SS) {
+  SS << "for(";
+  if (get_init()) {
+    get_init()->emit(SS);
+    // Here Init Stmt is VarStmt or ExprStmt. Semicolon is emitted by it.
+  } else {
+    SS << ";";
+  }
+  if (get_cond()) {
+    get_cond()->emit(SS);
+    SS << ";";
+  } else {
+    SS << ";";
+  }
+  if (get_step()) {
+    get_step()->emit(SS);
+  }
+  SS << "){";
   get_body()->emit(SS);
-  SS << " }";
+  SS << "}";
 }
 
-void Do::emit_impl(std::stringstream &SS) {
-  SS << "do {";
+void DoStmt::emit_impl(std::ostream &SS) {
+  SS << "do{";
   get_body()->emit(SS);
-  SS << " } while (";
+  SS << "}while(";
   get_cond()->emit(SS);
   SS << ")";
 }
 
-void Block::emit_impl(std::stringstream &SS) {
-  SS << "{\n";
+void BlockStmt::emit_impl(std::ostream &SS) {
+  SS << "{";
   get_scope()->emit(SS);
   SS << "}";
 }
 
-void ExprStmt::emit_impl(std::stringstream &SS) {
+void ExprStmt::emit_impl(std::ostream &SS) {
   get_expr()->emit(SS);
   SS << ";";
 }
 
-void Return::emit_impl(std::stringstream &SS) {
+void ReturnStmt::emit_impl(std::ostream &SS) {
   SS << "return";
   if (get_expr()) {
     SS << " ";
@@ -70,12 +80,12 @@ void Return::emit_impl(std::stringstream &SS) {
   SS << ";";
 }
 
-void Break::emit_impl(std::stringstream &SS) { SS << "break;"; }
+void BreakStmt::emit_impl(std::ostream &SS) { SS << "break;"; }
 
-void Continue::emit_impl(std::stringstream &SS) { SS << "continue;"; }
+void ContinueStmt::emit_impl(std::ostream &SS) { SS << "continue;"; }
 
-void Label::emit_impl(std::stringstream &SS) {
-  SS << get_name() << ": ";
+void LabelStmt::emit_impl(std::ostream &SS) {
+  SS << get_name() << ":";
   if (get_stmt()) {
     get_stmt()->emit(SS);
   } else {
@@ -83,14 +93,14 @@ void Label::emit_impl(std::stringstream &SS) {
   }
 }
 
-void Goto::emit_impl(std::stringstream &SS) {
+void GotoStmt::emit_impl(std::ostream &SS) {
   SS << "goto " << get_name() << ";";
 }
 
-void Switch::emit_impl(std::stringstream &SS) {
-  SS << "switch (";
+void SwitchStmt::emit_impl(std::ostream &SS) {
+  SS << "switch(";
   get_cond()->emit(SS);
-  SS << ") {";
+  SS << "){";
   get_body()->emit(SS);
   SS << "}";
 }

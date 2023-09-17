@@ -1,15 +1,15 @@
 #ifndef NAMEC_GEN_DECL_H
 #define NAMEC_GEN_DECL_H
 
-#include "Forwards.h"
 #include "internal/Gen/Emit.h"
+#include "internal/Gen/Forwards.h"
 
 namespace namec {
 
 class Decl : public Emit {
 public:
   virtual ~Decl() = default;
-  virtual void emit_impl(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::ostream &SS) = 0;
 };
 
 class RawDecl : public Decl {
@@ -20,7 +20,7 @@ public:
   std::string get_val() { return Val; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class VarDecl : public Decl {
@@ -53,7 +53,7 @@ public:
   bool is_restrict() { return IsRestrict; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class ArrayVarDecl : public VarDecl {
@@ -67,7 +67,7 @@ public:
   std::vector<Expr *> get_size() { return Size; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class TypedefDecl : public Decl {
@@ -78,7 +78,7 @@ public:
   TypeAlias *get_type_alias() { return TA; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class FuncDecl : public Decl {
@@ -104,7 +104,7 @@ public:
   bool is_static() { return IsStatic; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class StructDecl : public Decl {
@@ -115,7 +115,7 @@ public:
   Struct *get_struct() { return S; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class UnionDecl : public Decl {
@@ -126,7 +126,7 @@ public:
   Union *get_union() { return U; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class EnumDecl : public Decl {
@@ -137,7 +137,7 @@ public:
   Enum *get_enum() { return E; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 } // namespace namec

@@ -10,7 +10,7 @@ class Directive : public Emit {
 
 public:
   virtual ~Directive() = default;
-  virtual void emit_impl(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::ostream &SS) = 0;
 };
 
 class Include : public Directive {
@@ -21,7 +21,7 @@ public:
   std::string get_path() { return Path; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class SystemInclude : public Directive {
@@ -32,7 +32,7 @@ public:
   std::string get_path() { return Path; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Define : public Directive {
@@ -47,7 +47,7 @@ public:
   std::string get_value() { return Value; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Undef : public Directive {
@@ -58,7 +58,7 @@ public:
   std::string get_name() { return Name; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Pragma : public Directive {
@@ -70,7 +70,7 @@ public:
   std::string get_value() { return Value; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class IfDirective : public Directive {
@@ -88,7 +88,7 @@ public:
   TopLevel *get_or_add_else();
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Ifdef : public IfDirective {
@@ -97,7 +97,7 @@ public:
   Ifdef(std::string Cond) : IfDirective(Cond) {}
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Ifndef : public IfDirective {
@@ -106,7 +106,7 @@ public:
   Ifndef(std::string Cond) : IfDirective(Cond) {}
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 } // namespace namec

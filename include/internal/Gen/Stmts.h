@@ -10,6 +10,7 @@ namespace namec {
 // To eliminate circular dependency of Scope constructor
 
 class Stmt : public Emit {
+protected:
   Context &C;
 
 public:
@@ -25,7 +26,7 @@ public:
   std::string get_val() { return Val; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class DeclStmt : public Stmt {
@@ -36,78 +37,86 @@ public:
   Decl *get_decl() { return D; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class If : public Stmt {
+class IfStmt : public Stmt {
   Expr *Cond;
-  std::unique_ptr<Scope> Then;
-  std::unique_ptr<Scope> Else = nullptr;
+  Scope *Then;
+  Scope *Else = nullptr;
 
 public:
-  If(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Then(C.add_scope()) {}
+  IfStmt(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Then(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_then() { return Then.get(); }
-  Scope *get_or_add_else();
-  Scope *get_else() { return Else.get(); }
+  Scope *get_then() { return Then; }
+  Scope *get_or_add_else() {
+    if (!Else) {
+      Else = C.add_scope();
+    }
+    return Else;
+  }
+  Scope *get_else() { return Else; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class While : public Stmt {
+class WhileStmt : public Stmt {
   Expr *Cond;
-  std::unique_ptr<Scope> Body;
+  Scope *Body;
 
 public:
-  While(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
+  WhileStmt(Context &C, Expr *Cond)
+      : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_body() { return Body.get(); }
+  Scope *get_body() { return Body; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class For : public Stmt {
-  Stmt *Init;
+class ForStmt : public Stmt {
+  std::unique_ptr<Stmt> Init;
   Expr *Cond;
-  Stmt *Step;
-  std::unique_ptr<Scope> Body;
+  Expr *Step;
+  Scope *Body;
 
 public:
-  For(Context &C, Stmt *Init, Expr *Cond, Stmt *Step)
-      : Stmt(C), Init(Init), Cond(Cond), Step(Step), Body(C.add_scope()) {}
-  Stmt *get_init() { return Init; }
+  ForStmt(Context &C, std::unique_ptr<Stmt> Init, Expr *Cond, Expr *Step)
+      : Stmt(C), Cond(Cond), Step(Step), Body(C.add_scope()) {
+    this->Init = std::move(Init);
+  }
+  Stmt *get_init() { return Init.get(); }
   Expr *get_cond() { return Cond; }
-  Stmt *get_step() { return Step; }
-  Scope *get_body() { return Body.get(); }
+  Expr *get_step() { return Step; }
+  Scope *get_body() { return Body; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Do : public Stmt {
+class DoStmt : public Stmt {
   Expr *Cond;
-  std::unique_ptr<Scope> Body;
+  Scope *Body;
 
 public:
-  Do(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
+  DoStmt(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_body() { return Body.get(); }
+  Scope *get_body() { return Body; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Block : public Stmt {
-  std::unique_ptr<Scope> S;
+class BlockStmt : public Stmt {
+  Scope *S;
 
 public:
-  Block(Context &C) : Stmt(C), S(C.add_scope()) {}
-  Scope *get_scope() { return S.get(); }
+  BlockStmt(Context &C) : Stmt(C), S(C.add_scope()) {}
+  Scope *get_scope() { return S; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class ExprStmt : public Stmt {
@@ -118,72 +127,73 @@ public:
   Expr *get_expr() { return E; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Return : public Stmt {
+class ReturnStmt : public Stmt {
   Expr *E;
 
 public:
-  Return(Context &C, Expr *E) : Stmt(C), E(E) {}
+  ReturnStmt(Context &C, Expr *E) : Stmt(C), E(E) {}
   Expr *get_expr() { return E; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Break : public Stmt {
+class BreakStmt : public Stmt {
 public:
-  Break(Context &C) : Stmt(C) {}
+  BreakStmt(Context &C) : Stmt(C) {}
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Continue : public Stmt {
+class ContinueStmt : public Stmt {
 public:
-  Continue(Context &C) : Stmt(C) {}
+  ContinueStmt(Context &C) : Stmt(C) {}
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Label : public Stmt {
+class LabelStmt : public Stmt {
   std::string Name;
   Stmt *S;
 
 public:
-  Label(Context &C, std::string Name, Stmt *S = nullptr)
+  LabelStmt(Context &C, std::string Name, Stmt *S = nullptr)
       : Stmt(C), Name(Name), S(S) {}
   std::string get_name() { return Name; }
   Stmt *get_stmt() { return S; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Goto : public Stmt {
+class GotoStmt : public Stmt {
   std::string Name;
 
 public:
-  Goto(Context &C, std::string Name) : Stmt(C), Name(Name) {}
+  GotoStmt(Context &C, std::string Name) : Stmt(C), Name(Name) {}
   std::string get_name() { return Name; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Switch : public Stmt {
+class SwitchStmt : public Stmt {
   Expr *Cond;
-  std::unique_ptr<Scope> Body;
+  Scope *Body;
 
 public:
-  Switch(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
+  SwitchStmt(Context &C, Expr *Cond)
+      : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_body();
+  Scope *get_body() { return Body; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 } // namespace namec

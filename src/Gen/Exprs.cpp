@@ -2,30 +2,29 @@
 
 using namespace namec;
 
-void RawExpr::emit_impl(std::stringstream &SS) { SS << get_val(); }
+void RawExpr::emit_impl(std::ostream &SS) { SS << get_val(); }
 
-void Variable::emit_impl(std::stringstream &SS) {
-  SS << get_decl()->get_name();
-}
+void VariableExpr::emit_impl(std::ostream &SS) { SS << get_decl()->get_name(); }
 
-void Subscript::emit_impl(std::stringstream &SS) {
+void SubscriptExpr::emit_impl(std::ostream &SS) {
   get_array()->emit(SS);
   SS << "[";
   get_index()->emit(SS);
   SS << "]";
 }
 
-void Call::emit_impl(std::stringstream &SS) {
+void CallExpr::emit_impl(std::ostream &SS) {
   get_callee()->emit(SS);
   SS << "(";
-  for (auto Arg : get_args()) {
-    Arg->emit(SS);
-    SS << ", ";
+  for (auto I = 0; I < Args.size(); ++I) {
+    Args[I]->emit(SS);
+    if (I != Args.size() - 1)
+      SS << ",";
   }
   SS << ")";
 }
 
-void UnaryOp::emit_impl(std::stringstream &SS) {
+void UnaryOp::emit_impl(std::ostream &SS) {
   if (IsPrefix) {
     SS << Op;
     Operand->emit(SS);
@@ -35,28 +34,28 @@ void UnaryOp::emit_impl(std::stringstream &SS) {
   }
 }
 
-void BinaryOp::emit_impl(std::stringstream &SS) {
+void BinaryOp::emit_impl(std::ostream &SS) {
   LHS->emit(SS);
   SS << Op;
   RHS->emit(SS);
 }
 
-void TernaryOp::emit_impl(std::stringstream &SS) {
+void TernaryOp::emit_impl(std::ostream &SS) {
   Cond->emit(SS);
-  SS << " ? ";
+  SS << "?";
   Then->emit(SS);
-  SS << " : ";
+  SS << ":";
   Else->emit(SS);
 }
 
-void Cast::emit_impl(std::stringstream &SS) {
+void CastExpr::emit_impl(std::ostream &SS) {
   SS << "(";
   get_type()->emit(SS);
   SS << ")";
   get_operand()->emit(SS);
 }
 
-void Paren::emit_impl(std::stringstream &SS) {
+void ParenExpr::emit_impl(std::ostream &SS) {
   SS << "(";
   get_inside()->emit(SS);
   SS << ")";

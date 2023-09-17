@@ -19,6 +19,7 @@ class Scope : public Emit,
 
   template <typename T> T *add(T *S) {
     Stmts.push_back(std::unique_ptr<Stmt>(S));
+    Entries.push_back(S);
     return S;
   }
 
@@ -29,27 +30,29 @@ protected:
 public:
   Scope(Context &C) : C(C), UbiquitousDeclStmtMixIn(C) {}
   virtual ~Scope() {}
-  virtual void emit_impl(std::stringstream &SS);
+  void emit_impl(std::ostream &SS) override;
 
   // Stmt APIs
   RawStmt *stmt_raw(std::string Val) { return add(new RawStmt(C, Val)); }
+  RawStmt *stmt_empty() { return stmt_raw(";"); }
   DeclStmt *stmt_decl(Decl *D) { return add(new DeclStmt(C, D)); }
-  If *stmt_if(Expr *Cond) { return add(new If(C, Cond)); }
-  While *stmt_while(Expr *Cond) { return add(new While(C, Cond)); }
-  For *stmt_for(Stmt *Init, Expr *Cond, Stmt *Step) {
-    return add(new For(C, Init, Cond, Step));
-  }
-  Do *stmt_do(Expr *Cond) { return add(new Do(C, Cond)); }
-  Block *stmt_block() { return add(new Block(C)); }
+  IfStmt *stmt_if(Expr *Cond) { return add(new IfStmt(C, Cond)); }
+  WhileStmt *stmt_while(Expr *Cond) { return add(new WhileStmt(C, Cond)); }
+  ForStmt *stmt_for(VarDecl *Init, Expr *Cond, Expr *Step);
+  ForStmt *stmt_for(Expr *Init, Expr *Cond, Expr *Step);
+  DoStmt *stmt_do(Expr *Cond) { return add(new DoStmt(C, Cond)); }
+  BlockStmt *stmt_block() { return add(new BlockStmt(C)); }
   ExprStmt *stmt_expr(Expr *E) { return add(new ExprStmt(C, E)); }
-  Return *stmt_return(Expr *Val = nullptr) { return add(new Return(C, Val)); }
-  Break *stmt_break() { return add(new Break(C)); }
-  Continue *stmt_continue() { return add(new Continue(C)); }
-  Label *stmt_label(std::string Name, Stmt *S) {
-    return add(new Label(C, Name, S));
+  ReturnStmt *stmt_return(Expr *Val = nullptr) {
+    return add(new ReturnStmt(C, Val));
   }
-  Goto *stmt_goto(std::string Name) { return add(new Goto(C, Name)); }
-  Switch *stmt_switch(Expr *Cond) { return add(new Switch(C, Cond)); }
+  BreakStmt *stmt_break() { return add(new BreakStmt(C)); }
+  ContinueStmt *stmt_continue() { return add(new ContinueStmt(C)); }
+  LabelStmt *stmt_label(std::string Name, Stmt *S = nullptr) {
+    return add(new LabelStmt(C, Name, S));
+  }
+  GotoStmt *stmt_goto(std::string Name) { return add(new GotoStmt(C, Name)); }
+  SwitchStmt *stmt_switch(Expr *Cond) { return add(new SwitchStmt(C, Cond)); }
 };
 
 } // namespace namec

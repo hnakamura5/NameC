@@ -11,7 +11,7 @@ class Type : public Emit {
 
 public:
   virtual ~Type() = default;
-  virtual void emit_impl(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::ostream &SS) = 0;
 };
 
 class RawType : public Type {
@@ -22,13 +22,13 @@ public:
   std::string get_val() { return Val; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Void : public Type {
 public:
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Named : public Type {
@@ -39,7 +39,7 @@ public:
   Decl *get_decl() { return D; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class TypeAlias : public Type {
@@ -52,7 +52,7 @@ public:
   Type *get_type() { return Ty; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Pointer : public Type {
@@ -63,7 +63,7 @@ public:
   Type *get_elm_type() { return ElmTy; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Array : public Type {
@@ -76,7 +76,7 @@ public:
   std::vector<Expr *> get_size() { return Size; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Function : public Type {
@@ -90,7 +90,7 @@ public:
   std::vector<Type *> get_params() { return Params; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class MembersType : public Type {
@@ -111,7 +111,7 @@ public:
   }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Struct : public MembersType {
@@ -119,7 +119,7 @@ public:
   Struct(std::string Name) : MembersType(Name) {}
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Union : public MembersType {
@@ -127,7 +127,7 @@ public:
   Union(std::string Name) : MembersType(Name) {}
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class Enum : public Type {
@@ -147,7 +147,7 @@ public:
   }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 } // namespace namec

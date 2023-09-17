@@ -60,9 +60,6 @@ private:
   // Decl factory APIs. Not public to user. Intended to be used by internal
   // construction in File and Scope.
   RawDecl *decl_raw(std::string Val) { return add_decl(new RawDecl(Val)); }
-  VarDecl *decl_var(std::string Name, Type *T, Expr *Init = nullptr) {
-    return add_decl(new VarDecl(Name, T, Init));
-  }
   ArrayVarDecl *decl_array_var(std::string Name, Type *T,
                                std::vector<Expr *> Size) {
     return add_decl(new ArrayVarDecl(Name, T, Size));
@@ -75,15 +72,41 @@ private:
   UnionDecl *decl_union(Union *U) { return add_decl(new UnionDecl(U)); }
   EnumDecl *decl_enum(Enum *E) { return add_decl(new EnumDecl(E)); }
 
-  // Expr APIs
+  // Expr APIs (and VarDecl API)
 public:
-  RawExpr *expr_raw(std::string Val) { return add_expr(new RawExpr(Val)); }
-  Variable *expr_var(VarDecl *D) { return add_expr(new Variable(D)); }
-  Subscript *expr_subscr(Expr *Base, Expr *Index) {
-    return add_expr(new Subscript(Base, Index));
+  VarDecl *decl_var(std::string Name, Type *T, Expr *Init = nullptr) {
+    return add_decl(new VarDecl(Name, T, Init));
   }
-  Call *expr_call(Expr *Callee, std::vector<Expr *> Args) {
-    return add_expr(new Call(Callee, Args));
+  RawExpr *expr_raw(std::string Val) { return add_expr(new RawExpr(Val)); }
+  RawExpr *expr_true() { return expr_raw("true"); }
+  RawExpr *expr_false() { return expr_raw("false"); }
+  RawExpr *expr_int(int Val) { return expr_raw(std::to_string(Val)); }
+  RawExpr *expr_uint(unsigned int Val) {
+    return expr_raw(std::to_string(Val) + "u");
+  }
+  RawExpr *expr_long(long Val) { return expr_raw(std::to_string(Val) + "l"); }
+  RawExpr *expr_ulong(unsigned long Val) {
+    return expr_raw(std::to_string(Val) + "ul");
+  }
+  RawExpr *expr_llong(long long Val) {
+    return expr_raw(std::to_string(Val) + "ll");
+  }
+  RawExpr *expr_ullong(unsigned long long Val) {
+    return expr_raw(std::to_string(Val) + "ull");
+  }
+  RawExpr *expr_float(float Val) { return expr_raw(std::to_string(Val) + "f"); }
+  RawExpr *expr_double(float Val) { return expr_raw(std::to_string(Val)); }
+  RawExpr *expr_char(char Val) {
+    return expr_raw(std::string("'") + Val + "'");
+  }
+  RawExpr *expr_str(std::string Val) { return expr_raw("\"" + Val + "\""); }
+  VariableExpr *expr_var(VarDecl *D) { return add_expr(new VariableExpr(D)); }
+  RawExpr *expr_var_name(std::string Name) { return expr_raw(Name); }
+  SubscriptExpr *expr_subscr(Expr *Base, Expr *Index) {
+    return add_expr(new SubscriptExpr(Base, Index));
+  }
+  CallExpr *expr_call(Expr *Callee, std::vector<Expr *> Args) {
+    return add_expr(new CallExpr(Callee, Args));
   }
   // prefix type unary operation
   UnaryOp *expr_pre_unary(std::string Op, Expr *E) {
@@ -99,8 +122,10 @@ public:
   TernaryOp *expr_ternary(Expr *Cond, Expr *LHS, Expr *RHS) {
     return add_expr(new TernaryOp(Cond, LHS, RHS));
   }
-  Cast *expr_cast(Type *Ty, Expr *E) { return add_expr(new Cast(Ty, E)); }
-  Paren *expr_paren(Expr *E) { return add_expr(new Paren(E)); }
+  CastExpr *expr_cast(Type *Ty, Expr *E) {
+    return add_expr(new CastExpr(Ty, E));
+  }
+  ParenExpr *expr_paren(Expr *E) { return add_expr(new ParenExpr(E)); }
 
   // Type APIs
 public:
@@ -122,7 +147,7 @@ public:
     return add_type(new TypeAlias(Name, Ty));
   }
 
-  Named *type_named(Decl *D) {
+  Named *type_name(Decl *D) {
     if (auto P = NamedTypeMap.find(D); P != NamedTypeMap.end()) {
       return P->second;
     }

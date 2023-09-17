@@ -10,7 +10,7 @@ class Emit {
   std::string CommentAfter;
 
 protected:
-  virtual void emit_impl(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::ostream &SS) = 0;
 
 public:
   void set_comment_before(std::string CommentBefore) {
@@ -22,7 +22,7 @@ public:
   }
   std::string get_comment_after() { return CommentAfter; }
 
-  void emit(std::stringstream &SS) {
+  void emit(std::ostream &SS) {
     if (!CommentBefore.empty()) {
       SS << "/* " << CommentBefore << " */";
     }

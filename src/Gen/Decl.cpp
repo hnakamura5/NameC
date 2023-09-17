@@ -2,9 +2,9 @@
 
 using namespace namec;
 
-void RawDecl::emit_impl(std::stringstream &SS) { SS << get_val(); }
+void RawDecl::emit_impl(std::ostream &SS) { SS << get_val(); }
 
-void VarDecl::emit_impl(std::stringstream &SS) {
+void VarDecl::emit_impl(std::ostream &SS) {
   if (is_const()) {
     SS << "const ";
   }
@@ -17,7 +17,7 @@ void VarDecl::emit_impl(std::stringstream &SS) {
   if (is_volatile()) {
     SS << "volatile ";
   }
-  SS << get_type();
+  get_type()->emit(SS);
   SS << " ";
   if (is_restrict()) {
     SS << "restrict ";
@@ -29,7 +29,7 @@ void VarDecl::emit_impl(std::stringstream &SS) {
   }
 }
 
-void ArrayVarDecl::emit_impl(std::stringstream &SS) {
+void ArrayVarDecl::emit_impl(std::ostream &SS) {
   SS << get_type();
   SS << " ";
   SS << get_name();
@@ -45,7 +45,7 @@ void ArrayVarDecl::emit_impl(std::stringstream &SS) {
   }
 }
 
-void TypedefDecl::emit_impl(std::stringstream &SS) {
+void TypedefDecl::emit_impl(std::ostream &SS) {
   auto *T = get_type_alias()->get_type();
   SS << "typedef ";
   if (auto *FT = cast<Function>(T)) {
@@ -65,7 +65,7 @@ void TypedefDecl::emit_impl(std::stringstream &SS) {
   }
 }
 
-void FuncDecl::emit_impl(std::stringstream &SS) {
+void FuncDecl::emit_impl(std::ostream &SS) {
   SS << get_ret_type();
   SS << " ";
   SS << get_name();
@@ -77,6 +77,6 @@ void FuncDecl::emit_impl(std::stringstream &SS) {
   SS << ")";
 }
 
-void StructDecl::emit_impl(std::stringstream &SS) { S->emit(SS); }
-void UnionDecl::emit_impl(std::stringstream &SS) { U->emit(SS); }
-void EnumDecl::emit_impl(std::stringstream &SS) { E->emit(SS); }
+void StructDecl::emit_impl(std::ostream &SS) { S->emit(SS); }
+void UnionDecl::emit_impl(std::ostream &SS) { U->emit(SS); }
+void EnumDecl::emit_impl(std::ostream &SS) { E->emit(SS); }

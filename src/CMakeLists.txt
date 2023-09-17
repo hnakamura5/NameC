@@ -13,3 +13,5 @@ target_sources(NameC_Gen PRIVATE
 )
 
 target_link_libraries(NameC_Gen PRIVATE basic_configs)
+
+install(TARGETS NameC_Gen RUNTIME)

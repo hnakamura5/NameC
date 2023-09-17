@@ -11,7 +11,7 @@ class Expr : public Emit {
 
 public:
   virtual ~Expr() = default;
-  virtual void emit_impl(std::stringstream &SS) = 0;
+  virtual void emit_impl(std::ostream &SS) = 0;
 };
 
 class RawExpr : public Expr {
@@ -22,44 +22,45 @@ public:
   std::string get_val() { return Val; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Variable : public Expr {
+class VariableExpr : public Expr {
   VarDecl *D;
 
 public:
-  Variable(VarDecl *D) : D(D) {}
+  VariableExpr(VarDecl *D) : D(D) {}
   VarDecl *get_decl() { return D; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Subscript : public Expr {
+class SubscriptExpr : public Expr {
   Expr *Array;
   Expr *Index;
 
 public:
-  Subscript(Expr *Array, Expr *Index) : Array(Array), Index(Index) {}
+  SubscriptExpr(Expr *Array, Expr *Index) : Array(Array), Index(Index) {}
   Expr *get_array() { return Array; }
   Expr *get_index() { return Index; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Call : public Expr {
+class CallExpr : public Expr {
   Expr *Callee;
   std::vector<Expr *> Args;
 
 public:
-  Call(Expr *Callee, std::vector<Expr *> Args) : Callee(Callee), Args(Args) {}
+  CallExpr(Expr *Callee, std::vector<Expr *> Args)
+      : Callee(Callee), Args(Args) {}
   Expr *get_callee() { return Callee; }
   std::vector<Expr *> get_args() { return Args; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class UnaryOp : public Expr {
@@ -75,7 +76,7 @@ public:
   bool is_prefix() { return IsPrefix; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class BinaryOp : public Expr {
@@ -90,7 +91,7 @@ public:
   std::string get_op() { return Op; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class TernaryOp : public Expr {
@@ -106,31 +107,31 @@ public:
   Expr *get_else() { return Else; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Cast : public Expr {
+class CastExpr : public Expr {
   Type *Ty;
   Expr *Operand;
 
 public:
-  Cast(Type *Ty, Expr *Operand) : Ty(Ty), Operand(Operand) {}
+  CastExpr(Type *Ty, Expr *Operand) : Ty(Ty), Operand(Operand) {}
   Type *get_type() { return Ty; }
   Expr *get_operand() { return Operand; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
-class Paren : public Expr {
+class ParenExpr : public Expr {
   Expr *Inside;
 
 public:
-  Paren(Expr *Inside) : Inside(Inside) {}
+  ParenExpr(Expr *Inside) : Inside(Inside) {}
   Expr *get_inside() { return Inside; }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 // TODO: Initializer list.

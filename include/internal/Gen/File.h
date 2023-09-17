@@ -37,7 +37,7 @@ public:
                      std::vector<VarDecl *> Params);
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 class File : public Emit {
@@ -51,7 +51,7 @@ public:
   TopLevel *get_top_level() { return TheTopLevel.get(); }
 
 protected:
-  void emit_impl(std::stringstream &SS) override;
+  void emit_impl(std::ostream &SS) override;
 };
 
 } // namespace namec
