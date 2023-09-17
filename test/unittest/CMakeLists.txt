@@ -13,4 +13,5 @@ endmacro()
 
 define_gen_test(ExprTest)
 define_gen_test(StmtTest)
-
+define_gen_test(TypeTest)
+define_gen_test(DirectiveTest)

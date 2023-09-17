@@ -60,3 +60,27 @@ void ParenExpr::emit_impl(std::ostream &SS) {
   get_inside()->emit(SS);
   SS << ")";
 }
+
+void DesignatedInitExpr::emit_impl(std::ostream &SS) {
+  SS << "{";
+  for (auto I = 0; I < Designators.size(); ++I) {
+    auto &[Name, E] = Designators[I];
+    SS << "." << Name << "=";
+    E->emit(SS);
+    if (I != Designators.size() - 1) {
+      SS << ",";
+    }
+  }
+  SS << "}";
+}
+
+void InitListExpr::emit_impl(std::ostream &SS) {
+  SS << "{";
+  for (auto I = 0; I < Values.size(); ++I) {
+    Values[I]->emit(SS);
+    if (I != Values.size() - 1) {
+      SS << ",";
+    }
+  }
+  SS << "}";
+}

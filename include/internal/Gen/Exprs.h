@@ -134,6 +134,35 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+class DesignatedInitExpr : public Expr {
+  std::vector<std::pair<std::string, Expr *>> Designators;
+
+public:
+  using iterator = decltype(Designators)::iterator;
+  DesignatedInitExpr(std::vector<std::pair<std::string, Expr *>> Designators)
+      : Designators(Designators) {}
+  IteratorRange<iterator> designators() {
+    return IteratorRange<iterator>(Designators.begin(), Designators.end());
+  }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class InitListExpr : public Expr {
+  std::vector<Expr *> Values;
+
+public:
+  using iterator = decltype(Values)::iterator;
+  InitListExpr(std::vector<Expr *> Values) : Values(Values) {}
+  IteratorRange<iterator> values() {
+    return IteratorRange<iterator>(Values.begin(), Values.end());
+  }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
 // TODO: Initializer list.
 
 } // namespace namec

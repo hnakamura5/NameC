@@ -14,9 +14,6 @@ void TopLevel::emit_impl(std::ostream &SS) {
     E->emit(SS);
     SS << "\n";
   }
-  for (auto &C : Children) {
-    C->emit(SS);
-  }
 }
 
 void File::emit_impl(std::ostream &SS) { TheTopLevel->emit(SS); }

@@ -4,6 +4,7 @@
 #include "internal/Gen/Decl.h"
 #include "internal/Gen/Exprs.h"
 #include "internal/Gen/Forwards.h"
+#include "internal/Gen/MixIns.h"
 #include "internal/Gen/Types.h"
 
 namespace namec {
@@ -15,6 +16,7 @@ class Context {
   friend class File;
   friend class Scope;
   friend class TopLevel;
+  friend class UbiquitousDeclStmtMixIn;
 
   std::vector<std::unique_ptr<Scope>> Scopes;
   std::vector<std::unique_ptr<Decl>> Decls;
@@ -61,8 +63,8 @@ private:
   // construction in File and Scope.
   RawDecl *decl_raw(std::string Val) { return add_decl(new RawDecl(Val)); }
   ArrayVarDecl *decl_array_var(std::string Name, Type *T,
-                               std::vector<Expr *> Size) {
-    return add_decl(new ArrayVarDecl(Name, T, Size));
+                               std::vector<Expr *> Size, Expr *Init = nullptr) {
+    return add_decl(new ArrayVarDecl(Name, T, Size, Init));
   }
   FuncDecl *decl_func(std::string Name, Type *RetTy,
                       std::vector<VarDecl *> Params) {
@@ -71,6 +73,9 @@ private:
   StructDecl *decl_struct(Struct *S) { return add_decl(new StructDecl(S)); }
   UnionDecl *decl_union(Union *U) { return add_decl(new UnionDecl(U)); }
   EnumDecl *decl_enum(Enum *E) { return add_decl(new EnumDecl(E)); }
+  TypedefDecl *decl_typedef(std::string Name, Type *T) {
+    return add_decl(new TypedefDecl(type_typedef(Name, T)));
+  }
 
   // Expr APIs (and VarDecl API)
 public:
@@ -126,6 +131,13 @@ public:
     return add_expr(new CastExpr(Ty, E));
   }
   ParenExpr *expr_paren(Expr *E) { return add_expr(new ParenExpr(E)); }
+  DesignatedInitExpr *expr_designated_init(
+      std::vector<std::pair<std::string, Expr *>> Designators) {
+    return add_expr(new DesignatedInitExpr(Designators));
+  }
+  InitListExpr *expr_init_list(std::vector<Expr *> Values) {
+    return add_expr(new InitListExpr(Values));
+  }
 
   // Type APIs
 public:
@@ -155,7 +167,7 @@ public:
     NamedTypeMap[D] = Ty;
     return Ty;
   }
-  Pointer *type_pointer(Type *ElmTy) {
+  Pointer *type_ptr(Type *ElmTy) {
     if (auto P = PointerTypeMap.find(ElmTy); P != PointerTypeMap.end()) {
       return P->second;
     }
@@ -171,7 +183,7 @@ public:
     ArrayTypeMap[ElmTy] = Ty;
     return Ty;
   }
-  Function *type_function(Type *RetTy, std::vector<Type *> Params) {
+  Function *type_func(Type *RetTy, std::vector<Type *> Params) {
     return add_type(new Function(RetTy, Params));
   }
   Struct *type_struct(std::string Name) { return add_type(new Struct(Name)); }

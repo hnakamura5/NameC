@@ -15,9 +15,9 @@ void IfStmt::emit_impl(std::ostream &SS) {
   SS << "){";
   get_then()->emit(SS);
   SS << "}";
-  if (get_else()) {
+  if (has_else()) {
     SS << "else{";
-    get_else()->emit(SS);
+    Else->emit(SS);
     SS << "}";
   }
 }

@@ -106,12 +106,9 @@ public:
     return IteratorRange<iterator>(iterator(Members, 0),
                                    iterator(Members, size()));
   }
-  void def_member(Type *Ty, std::string Name) {
+  void def_member(std::string Name, Type *Ty) {
     Members.push_back(std::make_unique<VarDecl>(Name, Ty));
   }
-
-protected:
-  void emit_impl(std::ostream &SS) override;
 };
 
 class Struct : public MembersType {

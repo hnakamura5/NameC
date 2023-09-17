@@ -24,6 +24,17 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+class RawDirective : public Directive {
+  std::string Val;
+
+public:
+  RawDirective(std::string Val) : Val(Val) {}
+  std::string get_val() { return Val; }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
 class SystemInclude : public Directive {
   std::string Path;
 
@@ -74,17 +85,19 @@ protected:
 };
 
 class IfDirective : public Directive {
+  Context &C;
+
 protected:
   std::string Cond;
   std::unique_ptr<TopLevel> Then;
   std::unique_ptr<TopLevel> Else;
 
 public:
-  IfDirective(std::string Cond);
+  IfDirective(Context &C, std::string Cond);
   virtual ~IfDirective() = default;
   std::string get_cond() { return Cond; }
   TopLevel *get_then() { return Then.get(); }
-  TopLevel *get_else() { return Else.get(); }
+  bool has_else() { return Else.get() != nullptr; }
   TopLevel *get_or_add_else();
 
 protected:
@@ -94,7 +107,7 @@ protected:
 class Ifdef : public IfDirective {
 
 public:
-  Ifdef(std::string Cond) : IfDirective(Cond) {}
+  Ifdef(Context &C, std::string Cond) : IfDirective(C, Cond) {}
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -103,7 +116,7 @@ protected:
 class Ifndef : public IfDirective {
 
 public:
-  Ifndef(std::string Cond) : IfDirective(Cond) {}
+  Ifndef(Context &C, std::string Cond) : IfDirective(C, Cond) {}
 
 protected:
   void emit_impl(std::ostream &SS) override;

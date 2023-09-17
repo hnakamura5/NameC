@@ -10,6 +10,7 @@ target_sources(NameC_Gen PRIVATE
     Gen/Scope.cpp
     Gen/Mixins.cpp
     Gen/Context.cpp
+    Gen/Directive.cpp
 )
 
 target_link_libraries(NameC_Gen PRIVATE basic_configs)

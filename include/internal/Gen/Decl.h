@@ -113,6 +113,7 @@ class StructDecl : public Decl {
 public:
   StructDecl(Struct *S) : S(S) {}
   Struct *get_struct() { return S; }
+  std::string get_name();
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -124,6 +125,7 @@ class UnionDecl : public Decl {
 public:
   UnionDecl(Union *U) : U(U) {}
   Union *get_union() { return U; }
+  std::string get_name();
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -135,6 +137,7 @@ class EnumDecl : public Decl {
 public:
   EnumDecl(Enum *E) : E(E) {}
   Enum *get_enum() { return E; }
+  std::string get_name();
 
 protected:
   void emit_impl(std::ostream &SS) override;

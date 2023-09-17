@@ -77,6 +77,11 @@ void FuncDecl::emit_impl(std::ostream &SS) {
   SS << ")";
 }
 
+std::string StructDecl::get_name() { return S->get_name(); }
 void StructDecl::emit_impl(std::ostream &SS) { S->emit(SS); }
+
+std::string UnionDecl::get_name() { return U->get_name(); }
 void UnionDecl::emit_impl(std::ostream &SS) { U->emit(SS); }
+
+std::string EnumDecl::get_name() { return E->get_name(); }
 void EnumDecl::emit_impl(std::ostream &SS) { E->emit(SS); }

@@ -20,7 +20,6 @@ class TopLevel : public Emit,
                  public UbiquitousDeclStmtMixIn {
   Context &C;
   std::vector<Emit *> Entries;
-  std::vector<std::unique_ptr<TopLevel>> Children;
 
 protected:
   void on_add_directive(Directive *D) override { Entries.push_back(D); }
@@ -28,10 +27,6 @@ protected:
 
 public:
   TopLevel(Context &C) : C(C), UbiquitousDeclStmtMixIn(C) {}
-  TopLevel *add_get_new_top_level() {
-    Children.push_back(std::make_unique<TopLevel>(C));
-    return Children.back().get();
-  }
   // Only in top level we can define/declare functions
   FuncDecl *def_func(std::string Name, Type *RetTy,
                      std::vector<VarDecl *> Params);

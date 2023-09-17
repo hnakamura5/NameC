@@ -31,6 +31,12 @@ public:
       SS << "/* " << CommentAfter << " */";
     }
   }
+
+  std::string to_string() {
+    std::stringstream SS;
+    emit(SS);
+    return SS.str();
+  }
 };
 
 } // namespace namec

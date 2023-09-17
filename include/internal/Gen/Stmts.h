@@ -55,7 +55,7 @@ public:
     }
     return Else;
   }
-  Scope *get_else() { return Else; }
+  bool has_else() { return Else != nullptr; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
