@@ -65,8 +65,15 @@ void TypedefDecl::emit_impl(std::ostream &SS) {
   }
 }
 
+Scope *FuncDecl::get_or_add_body() {
+  if (!Body) {
+    Body = C.add_scope();
+  }
+  return Body;
+}
+
 void FuncDecl::emit_impl(std::ostream &SS) {
-  SS << get_ret_type();
+  get_ret_type()->emit(SS);
   SS << " ";
   SS << get_name();
   SS << "(";
@@ -75,6 +82,11 @@ void FuncDecl::emit_impl(std::ostream &SS) {
     SS << ", ";
   }
   SS << ")";
+  if (Body) {
+    SS << "{";
+    Body->emit(SS);
+    SS << "}";
+  }
 }
 
 std::string StructDecl::get_name() { return S->get_name(); }

@@ -1,5 +1,7 @@
 #include "internal/Gen.h"
 
+#include <fstream>
+
 using namespace namec;
 
 FuncDecl *TopLevel::def_func(std::string Name, Type *RetTy,
@@ -16,4 +18,14 @@ void TopLevel::emit_impl(std::ostream &SS) {
   }
 }
 
-void File::emit_impl(std::ostream &SS) { TheTopLevel->emit(SS); }
+void CFile::emit_to_file(std::filesystem::path Path) {
+  std::ofstream OS(Path);
+  emit(OS);
+}
+
+void CFile::emit_impl(std::ostream &SS) {
+  for (auto &T : TopLevels) {
+    T->emit(SS);
+    SS << "\n";
+  }
+}

@@ -1,6 +1,7 @@
 #ifndef NAMEC_GEN_FILE_H
 #define NAMEC_GEN_FILE_H
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -36,15 +37,23 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class File : public Emit {
+class CFile : public Emit {
 
   Context &C;
-  std::unique_ptr<TopLevel> TheTopLevel;
+  std::vector<std::unique_ptr<TopLevel>> TopLevels;
 
 public:
-  File(Context &C) : C(C) { TheTopLevel.reset(new TopLevel(C)); }
-  virtual ~File() {}
-  TopLevel *get_top_level() { return TheTopLevel.get(); }
+  CFile(Context &C) : C(C) {
+    TopLevels.push_back(std::make_unique<TopLevel>(C));
+  }
+  virtual ~CFile() {}
+  TopLevel *get_first_top_level() { return TopLevels[0].get(); }
+  // Add a new top level. This is only for convenience of generation.
+  TopLevel *add_top_level() {
+    TopLevels.push_back(std::make_unique<TopLevel>(C));
+    return TopLevels.back().get();
+  }
+  void emit_to_file(std::filesystem::path Path);
 
 protected:
   void emit_impl(std::ostream &SS) override;

@@ -13,7 +13,7 @@ namespace namec {
 // This also exists to eliminate complex circular dependency between Scope,
 // Decl, Stmt and Expr.
 class Context {
-  friend class File;
+  friend class CFile;
   friend class Scope;
   friend class TopLevel;
   friend class UbiquitousDeclStmtMixIn;
@@ -68,7 +68,7 @@ private:
   }
   FuncDecl *decl_func(std::string Name, Type *RetTy,
                       std::vector<VarDecl *> Params) {
-    return add_decl(new FuncDecl(Name, RetTy, Params));
+    return add_decl(new FuncDecl(*this, Name, RetTy, Params));
   }
   StructDecl *decl_struct(Struct *S) { return add_decl(new StructDecl(S)); }
   UnionDecl *decl_union(Union *U) { return add_decl(new UnionDecl(U)); }

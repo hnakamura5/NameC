@@ -82,6 +82,7 @@ protected:
 };
 
 class FuncDecl : public Decl {
+  Context &C;
   Type *RetTy;
   std::string Name;
   std::vector<VarDecl *> Params;
@@ -92,8 +93,9 @@ class FuncDecl : public Decl {
   bool IsStatic = false;
 
 public:
-  FuncDecl(std::string Name, Type *RetTy, std::vector<VarDecl *> Params)
-      : RetTy(RetTy), Name(Name), Params(Params) {}
+  FuncDecl(Context &C, std::string Name, Type *RetTy,
+           std::vector<VarDecl *> Params)
+      : C(C), RetTy(RetTy), Name(Name), Params(Params) {}
   Type *get_ret_type() { return RetTy; }
   std::string get_name() { return Name; }
   std::vector<VarDecl *> get_params() { return Params; }

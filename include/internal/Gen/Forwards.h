@@ -13,7 +13,7 @@
 #include "internal/Util/VUIterator.h"
 
 namespace namec {
-class File;
+class CFile;
 class Context;
 class Scope;
 class Expr;
