@@ -104,10 +104,40 @@ void GotoStmt::emit_impl(std::ostream &SS) {
   SS << "goto " << get_name() << ";";
 }
 
+void CaseStmt::emit_impl(std::ostream &SS) {
+  if (get_val()) {
+    SS << "\ncase ";
+    get_val()->emit(SS);
+    SS << ":";
+  } else {
+    SS << "\ndefault:";
+  }
+  get_body()->emit(SS);
+  if (!IsFallThrough) {
+    SS << "break;";
+  }
+}
+
+CaseStmt *SwitchStmt::add_case(Expr *Val, bool IsFallThrough) {
+  auto Case = std::make_unique<CaseStmt>(C, Val, IsFallThrough);
+  auto *Ret = Case.get();
+  Cases.push_back(std::move(Case));
+  return Ret;
+}
+
+CaseStmt *SwitchStmt::add_default(bool IsFallThrough) {
+  auto Case = std::make_unique<CaseStmt>(C, nullptr, IsFallThrough);
+  auto *Ret = Case.get();
+  Cases.push_back(std::move(Case));
+  return Ret;
+}
+
 void SwitchStmt::emit_impl(std::ostream &SS) {
   SS << "switch(";
   get_cond()->emit(SS);
   SS << "){";
-  get_body()->emit(SS);
+  for (auto &C : Cases) {
+    C->emit(SS);
+  }
   SS << "}";
 }

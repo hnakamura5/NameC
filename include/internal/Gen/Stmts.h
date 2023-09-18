@@ -188,15 +188,32 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class SwitchStmt : public Stmt {
-  Expr *Cond;
+class CaseStmt : public Stmt {
+  Expr *Val; //  nullptr for default
   Scope *Body;
+  bool IsFallThrough;
 
 public:
-  SwitchStmt(Context &C, Expr *Cond)
-      : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
-  Expr *get_cond() { return Cond; }
+  CaseStmt(Context &C, Expr *Val = nullptr, bool IsFallThrough = false)
+      : Stmt(C), Val(Val), IsFallThrough(IsFallThrough), Body(C.add_scope()) {}
+  Expr *get_val() { return Val; }
+  bool is_default() { return Val == nullptr; }
+  bool is_fall_through() { return IsFallThrough; }
   Scope *get_body() { return Body; }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class SwitchStmt : public Stmt {
+  Expr *Cond;
+  std::vector<std::unique_ptr<CaseStmt>> Cases;
+
+public:
+  SwitchStmt(Context &C, Expr *Cond) : Stmt(C), Cond(Cond) {}
+  Expr *get_cond() { return Cond; }
+  CaseStmt *add_case(Expr *Val, bool IsFallThrough = false);
+  CaseStmt *add_default(bool IsFallThrough = false);
 
 protected:
   void emit_impl(std::ostream &SS) override;

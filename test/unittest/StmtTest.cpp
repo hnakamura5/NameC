@@ -105,9 +105,16 @@ TEST(StmtTest, GotoStmtTest) {
 
 TEST(StmtTest, SwitchStmtTest) {
   auto *W = S.stmt_switch(C.expr_raw("cond"));
-  auto *Body = W->get_body();
-  Body->stmt_raw("raw_body_stmt");
-  EXPECT_EQ(W->to_string(), "switch(cond){raw_body_stmt}");
+  auto *Case1 = W->add_case(C.expr_int(1), true);
+  Case1->get_body()->stmt_raw("raw_case1_stmt;");
+  auto *Case2 = W->add_case(C.expr_int(2));
+  Case2->get_body()->stmt_raw("raw_case2_stmt;");
+  auto *Default = W->add_default();
+  Default->get_body()->stmt_raw("raw_default_stmt;");
+  EXPECT_EQ(W->to_string(), "switch(cond){"
+                            "\ncase 1:raw_case1_stmt;"
+                            "\ncase 2:raw_case2_stmt;break;"
+                            "\ndefault:raw_default_stmt;break;}");
 }
 
 TEST(StmtTest, SeqTest) {
