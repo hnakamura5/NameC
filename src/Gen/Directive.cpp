@@ -18,7 +18,6 @@ void SystemInclude::emit_impl(std::ostream &SS) {
   SS << ">\n";
 }
 
-// TODO: function style macro
 void Define::emit_impl(std::ostream &SS) {
   SS << "\n";
   SS << "#define ";
@@ -27,6 +26,28 @@ void Define::emit_impl(std::ostream &SS) {
     SS << " ";
     SS << get_value();
   }
+  SS << "\n";
+}
+
+DefineFuncMacro::DefineFuncMacro(Context &C, std::string Name,
+                                 std::vector<std::string> Args)
+    : C(C), Name(Name), Args(Args) {
+  Body.reset(new MacroFuncScope(C));
+}
+
+void DefineFuncMacro::emit_impl(std::ostream &SS) {
+  SS << "\n";
+  SS << "#define ";
+  SS << get_name();
+  SS << "(";
+  for (auto I = 0; I < Args.size(); ++I) {
+    SS << Args[I];
+    if (I != Args.size() - 1) {
+      SS << ",";
+    }
+  }
+  SS << ") ";
+  get_body()->emit(SS);
   SS << "\n";
 }
 

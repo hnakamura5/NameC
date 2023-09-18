@@ -80,3 +80,12 @@ TEST(ExprTest, InitListTest) {
   auto *Init = C.expr_init_list({C.expr_int(1), C.expr_int(2)});
   EXPECT_EQ(Init->to_string(), "{1,2}");
 }
+
+TEST(ExprTest, GenericSelectionTest) {
+  auto *Control = C.expr_int(1);
+  auto *Gen = C.expr_generic_selection(Control);
+  Gen->add_assoc(C.type_int(), C.expr_int(2));
+  Gen->add_assoc(C.type_char(), C.expr_int(3));
+  Gen->add_default(C.expr_int(4));
+  EXPECT_EQ(Gen->to_string(), "_Generic(1,int:2,char:3,default:4)");
+}

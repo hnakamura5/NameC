@@ -163,7 +163,24 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-// TODO: Initializer list.
+// For C11 Generic selection
+class GenericSelection : public Expr {
+  Expr *ControlExpr;
+  std::vector<std::pair<Type *, Expr *>> AssocList;
+
+public:
+  using iterator = decltype(AssocList)::iterator;
+  GenericSelection(Expr *ControlExpr) : ControlExpr(ControlExpr) {}
+  Expr *get_control() { return ControlExpr; }
+  void add_assoc(Type *T, Expr *E) { AssocList.push_back({T, E}); }
+  void add_default(Expr *E) { AssocList.push_back({nullptr, E}); }
+
+protected:
+  IteratorRange<iterator> assocs() {
+    return IteratorRange<iterator>(AssocList.begin(), AssocList.end());
+  }
+  void emit_impl(std::ostream &SS) override;
+};
 
 } // namespace namec
 

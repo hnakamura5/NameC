@@ -4,10 +4,10 @@
 #include "internal/Gen/Decl.h"
 #include "internal/Gen/Exprs.h"
 #include "internal/Gen/Forwards.h"
-#include "internal/Gen/MixIns.h"
 #include "internal/Gen/Types.h"
 
 namespace namec {
+class UbiquitousDeclStmtMixIn;
 
 // Context manage Scope, Decl and Expr heap existence. Stmt are kept in Scope.
 // This also exists to eliminate complex circular dependency between Scope,
@@ -137,6 +137,9 @@ public:
   }
   InitListExpr *expr_init_list(std::vector<Expr *> Values) {
     return add_expr(new InitListExpr(Values));
+  }
+  GenericSelection *expr_generic_selection(Expr *ControllingExpr) {
+    return add_expr(new GenericSelection(ControllingExpr));
   }
 
   // Type factory APIs

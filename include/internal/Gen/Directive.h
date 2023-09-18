@@ -61,6 +61,25 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+class DefineFuncMacro : public Directive {
+  Context &C;
+  std::string Name;
+  std::vector<std::string> Args;
+  std::unique_ptr<MacroFuncScope> Body;
+
+public:
+  using iterator = decltype(Args)::iterator;
+  DefineFuncMacro(Context &C, std::string Name, std::vector<std::string> Args);
+  std::string get_name() { return Name; }
+  IteratorRange<iterator> args() {
+    return IteratorRange<iterator>(Args.begin(), Args.end());
+  }
+  MacroFuncScope *get_body() { return Body.get(); }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
 class Undef : public Directive {
   std::string Name;
 

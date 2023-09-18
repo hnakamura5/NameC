@@ -52,6 +52,17 @@ TEST(DirectiveTest, DefineTest) {
   EXPECT_EQ(F.to_string(), "\n#define macro value\n\n");
 }
 
+TEST(DirectiveTest, DefineFuncTest) {
+  TopLevel F(C);
+  auto *R = F.def_macro_func("macro", {"arg1", "arg2"});
+  auto *Body = R->get_body();
+  Body->stmt_raw("raw_body_directive1;");
+  Body->stmt_raw("raw_body_directive2;");
+  EXPECT_EQ(F.to_string(), "\n#define macro(arg1,arg2) "
+                           "raw_body_directive1;"
+                           "raw_body_directive2;\n\n");
+}
+
 TEST(DirectiveTest, UndefTest) {
   TopLevel F(C);
   auto *R = F.def_macro_undef("macro");

@@ -16,6 +16,7 @@ namespace namec {
 class CFile;
 class Context;
 class Scope;
+class MacroFuncScope;
 class Expr;
 class Stmt;
 class Type;

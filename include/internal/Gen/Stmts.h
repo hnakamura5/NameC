@@ -4,7 +4,6 @@
 #include "internal/Gen/Context.h"
 #include "internal/Gen/Decl.h"
 #include "internal/Gen/Forwards.h"
-#include "internal/Gen/MixIns.h"
 
 namespace namec {
 // To eliminate circular dependency of Scope constructor

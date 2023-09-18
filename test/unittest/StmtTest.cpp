@@ -112,9 +112,9 @@ TEST(StmtTest, SwitchStmtTest) {
   auto *Default = W->add_default();
   Default->get_body()->stmt_raw("raw_default_stmt;");
   EXPECT_EQ(W->to_string(), "switch(cond){"
-                            "\ncase 1:raw_case1_stmt;"
-                            "\ncase 2:raw_case2_stmt;break;"
-                            "\ndefault:raw_default_stmt;break;}");
+                            "case 1:raw_case1_stmt;"
+                            "case 2:raw_case2_stmt;break;"
+                            "default:raw_default_stmt;break;}");
 }
 
 TEST(StmtTest, SeqTest) {

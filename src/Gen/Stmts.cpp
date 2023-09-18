@@ -106,11 +106,11 @@ void GotoStmt::emit_impl(std::ostream &SS) {
 
 void CaseStmt::emit_impl(std::ostream &SS) {
   if (get_val()) {
-    SS << "\ncase ";
+    SS << "case ";
     get_val()->emit(SS);
     SS << ":";
   } else {
-    SS << "\ndefault:";
+    SS << "default:";
   }
   get_body()->emit(SS);
   if (!IsFallThrough) {

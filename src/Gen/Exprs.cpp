@@ -84,3 +84,23 @@ void InitListExpr::emit_impl(std::ostream &SS) {
   }
   SS << "}";
 }
+
+void GenericSelection::emit_impl(std::ostream &SS) {
+  SS << "_Generic(";
+  get_control()->emit(SS);
+  SS << ",";
+  for (auto I = 0; I < AssocList.size(); ++I) {
+    auto &[T, E] = AssocList[I];
+    if (T) {
+      T->emit(SS);
+      SS << ":";
+    } else {
+      SS << "default:";
+    }
+    E->emit(SS);
+    if (I != AssocList.size() - 1) {
+      SS << ",";
+    }
+  }
+  SS << ")";
+}
