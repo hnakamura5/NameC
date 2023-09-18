@@ -28,7 +28,8 @@ protected:
   virtual void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
 
 public:
-  Scope(Context &C) : C(C), UbiquitousDeclStmtMixIn(C) {}
+  Scope(Context &C)
+      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
   virtual ~Scope() {}
   void emit_impl(std::ostream &SS) override;
 

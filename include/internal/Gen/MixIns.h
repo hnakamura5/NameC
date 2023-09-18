@@ -8,6 +8,7 @@
 namespace namec {
 
 class DirectiveDefineMixin {
+  Context &C;
   std::vector<std::unique_ptr<Directive>> Directives;
 
   template <typename T> T *add(T *D) {
@@ -20,7 +21,7 @@ protected:
   virtual void on_add_directive(Directive *D) = 0;
 
 public:
-  DirectiveDefineMixin() {}
+  DirectiveDefineMixin(Context &C) : C(C) {}
   virtual ~DirectiveDefineMixin() {}
 
   RawDirective *directive_raw(std::string Val);
@@ -31,6 +32,9 @@ public:
   // TODO: void def_macro_func
   Undef *def_macro_undef(std::string Name);
   Pragma *pragma(std::string Value);
+  IfDirective *directive_if(Expr *Cond);
+  Ifdef *directive_ifdef(std::string Cond);
+  Ifndef *directive_ifndef(std::string Cond);
 
   // These semantically meaningless entities are defined as directive for
   // the convenience.

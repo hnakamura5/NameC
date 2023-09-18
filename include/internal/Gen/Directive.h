@@ -84,19 +84,20 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class IfDirective : public Directive {
+class IfDirectiveBase : public Directive {
   Context &C;
 
 protected:
-  std::string Cond;
   std::unique_ptr<TopLevel> Then;
+  std::vector<std::pair<Expr *, std::unique_ptr<TopLevel>>> Elifs;
   std::unique_ptr<TopLevel> Else;
 
+  // TODO: elif
+
 public:
-  IfDirective(Context &C, std::string Cond);
-  virtual ~IfDirective() = default;
-  std::string get_cond() { return Cond; }
+  IfDirectiveBase(Context &C);
   TopLevel *get_then() { return Then.get(); }
+  TopLevel *add_elif(Expr *Cond);
   bool has_else() { return Else.get() != nullptr; }
   TopLevel *get_or_add_else();
 
@@ -104,19 +105,37 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class Ifdef : public IfDirective {
+class IfDirective : public IfDirectiveBase {
+
+protected:
+  Expr *Cond;
 
 public:
-  Ifdef(Context &C, std::string Cond) : IfDirective(C, Cond) {}
+  IfDirective(Context &C, Expr *Cond);
+  virtual ~IfDirective() = default;
+  Expr *get_cond() { return Cond; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class Ifndef : public IfDirective {
+class Ifdef : public IfDirectiveBase {
+  std::string CondStr;
 
 public:
-  Ifndef(Context &C, std::string Cond) : IfDirective(C, Cond) {}
+  Ifdef(Context &C, std::string Cond) : IfDirectiveBase(C), CondStr(Cond) {}
+  std::string get_cond() { return CondStr; }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class Ifndef : public IfDirectiveBase {
+  std::string CondStr;
+
+public:
+  Ifndef(Context &C, std::string Cond) : IfDirectiveBase(C), CondStr(Cond) {}
+  std::string get_cond() { return CondStr; }
 
 protected:
   void emit_impl(std::ostream &SS) override;

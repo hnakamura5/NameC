@@ -32,6 +32,18 @@ Pragma *DirectiveDefineMixin::pragma(std::string Value) {
   return add(new Pragma(Value));
 }
 
+IfDirective *DirectiveDefineMixin::directive_if(Expr *Cond) {
+  return add(new IfDirective(C, Cond));
+}
+
+Ifdef *DirectiveDefineMixin::directive_ifdef(std::string Cond) {
+  return add(new Ifdef(C, Cond));
+}
+
+Ifndef *DirectiveDefineMixin::directive_ifndef(std::string Cond) {
+  return add(new Ifndef(C, Cond));
+}
+
 RawDirective *DirectiveDefineMixin::insert_newline(size_t Count) {
   return directive_raw(std::string(Count, '\n'));
 }

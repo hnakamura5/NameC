@@ -77,7 +77,7 @@ private:
     return add_decl(new TypedefDecl(type_typedef(Name, T)));
   }
 
-  // Expr APIs (and VarDecl API)
+  // Expr factory APIs (and VarDecl API)
 public:
   VarDecl *decl_var(std::string Name, Type *T, Expr *Init = nullptr) {
     return add_decl(new VarDecl(Name, T, Init));
@@ -139,7 +139,7 @@ public:
     return add_expr(new InitListExpr(Values));
   }
 
-  // Type APIs
+  // Type factory APIs
 public:
   RawType *type_raw(std::string Val) { return add_type(new RawType(Val)); }
   RawType *type_char() { return get_or_add_raw_type("char"); }

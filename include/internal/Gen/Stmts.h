@@ -43,12 +43,18 @@ protected:
 class IfStmt : public Stmt {
   Expr *Cond;
   Scope *Then;
+  std::vector<std::pair<Expr *, Scope *>> Elseifs;
   Scope *Else = nullptr;
 
 public:
   IfStmt(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Then(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
   Scope *get_then() { return Then; }
+  Scope *add_elseif(Expr *Cond) {
+    auto S = C.add_scope();
+    Elseifs.push_back({Cond, S});
+    return S;
+  }
   Scope *get_or_add_else() {
     if (!Else) {
       Else = C.add_scope();

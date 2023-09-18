@@ -33,9 +33,16 @@ TEST(StmtTest, IfStmtTest) {
   auto *I = S.stmt_if(C.expr_raw("cond"));
   auto *Then = I->get_then();
   Then->stmt_raw("raw_then_stmt");
+  auto *Elseif1 = I->add_elseif(C.expr_raw("cond1"));
+  Elseif1->stmt_raw("raw_elseif_stmt1");
+  auto *Elseif2 = I->add_elseif(C.expr_raw("cond2"));
+  Elseif2->stmt_raw("raw_elseif_stmt2");
   auto *Else = I->get_or_add_else();
   Else->stmt_raw("raw_else_stmt");
-  EXPECT_EQ(I->to_string(), "if(cond){raw_then_stmt}else{raw_else_stmt}");
+  EXPECT_EQ(I->to_string(), "if(cond){raw_then_stmt}"
+                            "else if(cond1){raw_elseif_stmt1}"
+                            "else if(cond2){raw_elseif_stmt2}"
+                            "else{raw_else_stmt}");
 }
 
 TEST(StmtTest, ForStmtTest) {

@@ -26,7 +26,8 @@ protected:
   void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
 
 public:
-  TopLevel(Context &C) : C(C), UbiquitousDeclStmtMixIn(C) {}
+  TopLevel(Context &C)
+      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
   // Only in top level we can define/declare functions
   FuncDecl *def_func(std::string Name, Type *RetTy,
                      std::vector<VarDecl *> Params);

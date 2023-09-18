@@ -44,23 +44,35 @@ void Pragma::emit_impl(std::ostream &SS) {
   SS << "\n";
 }
 
-IfDirective::IfDirective(Context &C, std::string Cond) : C(C), Cond(Cond) {
+IfDirectiveBase::IfDirectiveBase(Context &C) : C(C) {
   Then.reset(new TopLevel(C));
 }
 
-TopLevel *IfDirective::get_or_add_else() {
+TopLevel *IfDirectiveBase::add_elif(Expr *Cond) {
+  auto E = std::make_unique<TopLevel>(C);
+  auto *Ret = E.get();
+  Elifs.push_back({Cond, std::move(E)});
+  return Ret;
+}
+
+TopLevel *IfDirectiveBase::get_or_add_else() {
   if (!Else.get()) {
     Else.reset(new TopLevel(C));
   }
   return Else.get();
 }
 
-void IfDirective::emit_impl(std::ostream &SS) {
-  SS << "\n";
-  SS << "#if ";
-  SS << get_cond();
+void IfDirectiveBase::emit_impl(std::ostream &SS) {
+  // Other part than #if, #ifdef, #ifndef
   SS << "\n";
   get_then()->emit(SS);
+  for (auto &[ElifCond, ElifThen] : Elifs) {
+    SS << "\n";
+    SS << "#elif ";
+    ElifCond->emit(SS);
+    SS << "\n";
+    ElifThen->emit(SS);
+  }
   SS << "\n";
   if (has_else()) {
     SS << "#else\n";
@@ -68,34 +80,28 @@ void IfDirective::emit_impl(std::ostream &SS) {
     SS << "\n";
   }
   SS << "#endif\n";
+}
+
+IfDirective::IfDirective(Context &C, Expr *Cond)
+    : IfDirectiveBase(C), Cond(Cond) {}
+
+void IfDirective::emit_impl(std::ostream &SS) {
+  SS << "\n";
+  SS << "#if ";
+  get_cond()->emit(SS);
+  IfDirectiveBase::emit_impl(SS);
 }
 
 void Ifdef::emit_impl(std::ostream &SS) {
   SS << "\n";
   SS << "#ifdef ";
   SS << get_cond();
-  SS << "\n";
-  get_then()->emit(SS);
-  SS << "\n";
-  if (has_else()) {
-    SS << "#else\n";
-    Else->emit(SS);
-    SS << "\n";
-  }
-  SS << "#endif\n";
+  IfDirectiveBase::emit_impl(SS);
 }
 
 void Ifndef::emit_impl(std::ostream &SS) {
   SS << "\n";
   SS << "#ifndef ";
   SS << get_cond();
-  SS << "\n";
-  get_then()->emit(SS);
-  SS << "\n";
-  if (has_else()) {
-    SS << "#else\n";
-    Else->emit(SS);
-    SS << "\n";
-  }
-  SS << "#endif\n";
+  IfDirectiveBase::emit_impl(SS);
 }

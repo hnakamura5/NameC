@@ -15,6 +15,13 @@ void IfStmt::emit_impl(std::ostream &SS) {
   SS << "){";
   get_then()->emit(SS);
   SS << "}";
+  for (auto &[ECond, EBody] : Elseifs) {
+    SS << "else if(";
+    ECond->emit(SS);
+    SS << "){";
+    EBody->emit(SS);
+    SS << "}";
+  }
   if (has_else()) {
     SS << "else{";
     Else->emit(SS);

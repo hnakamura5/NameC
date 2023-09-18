@@ -93,3 +93,93 @@ TEST(DirectiveTest, InsertLineCommentTest) {
   auto *R = F.insert_line_comment("comment");
   EXPECT_EQ(F.to_string(), "// comment\n\n");
 }
+
+TEST(DirectiveTest, IfDirectiveTest) {
+  TopLevel F(C);
+  auto *I = F.directive_if(C.expr_raw("cond"));
+  auto *Then = I->get_then();
+  Then->directive_raw("raw_then_directive1");
+  Then->directive_raw("raw_then_directive2");
+  auto *Elif1 = I->add_elif(C.expr_raw("cond1"));
+  Elif1->directive_raw("raw_elif1_directive1");
+  Elif1->directive_raw("raw_elif1_directive2");
+  auto *Elif2 = I->add_elif(C.expr_raw("cond2"));
+  Elif2->directive_raw("raw_elif2_directive1");
+  Elif2->directive_raw("raw_elif2_directive2");
+  auto *Else = I->get_or_add_else();
+  Else->directive_raw("raw_else_directive1");
+  Else->directive_raw("raw_else_directive2");
+  EXPECT_EQ(F.to_string(), "\n#if cond\n"
+                           "raw_then_directive1\n"
+                           "raw_then_directive2\n"
+                           "\n#elif cond1\n"
+                           "raw_elif1_directive1\n"
+                           "raw_elif1_directive2\n"
+                           "\n#elif cond2\n"
+                           "raw_elif2_directive1\n"
+                           "raw_elif2_directive2\n"
+                           "\n#else\n"
+                           "raw_else_directive1\n"
+                           "raw_else_directive2\n"
+                           "\n#endif\n\n");
+}
+
+TEST(DirectiveTest, IfdefDirectiveTest) {
+  TopLevel F(C);
+  auto *I = F.directive_ifdef("cond");
+  auto *Then = I->get_then();
+  Then->directive_raw("raw_then_directive1");
+  Then->directive_raw("raw_then_directive2");
+  auto *Elif1 = I->add_elif(C.expr_raw("cond1"));
+  Elif1->directive_raw("raw_elif1_directive1");
+  Elif1->directive_raw("raw_elif1_directive2");
+  auto *Elif2 = I->add_elif(C.expr_raw("cond2"));
+  Elif2->directive_raw("raw_elif2_directive1");
+  Elif2->directive_raw("raw_elif2_directive2");
+  auto *Else = I->get_or_add_else();
+  Else->directive_raw("raw_else_directive1");
+  Else->directive_raw("raw_else_directive2");
+  EXPECT_EQ(F.to_string(), "\n#ifdef cond\n"
+                           "raw_then_directive1\n"
+                           "raw_then_directive2\n"
+                           "\n#elif cond1\n"
+                           "raw_elif1_directive1\n"
+                           "raw_elif1_directive2\n"
+                           "\n#elif cond2\n"
+                           "raw_elif2_directive1\n"
+                           "raw_elif2_directive2\n"
+                           "\n#else\n"
+                           "raw_else_directive1\n"
+                           "raw_else_directive2\n"
+                           "\n#endif\n\n");
+}
+
+TEST(DirectiveTest, IfndefDirectiveTest) {
+  TopLevel F(C);
+  auto *I = F.directive_ifndef("cond");
+  auto *Then = I->get_then();
+  Then->directive_raw("raw_then_directive1");
+  Then->directive_raw("raw_then_directive2");
+  auto *Elif1 = I->add_elif(C.expr_raw("cond1"));
+  Elif1->directive_raw("raw_elif1_directive1");
+  Elif1->directive_raw("raw_elif1_directive2");
+  auto *Elif2 = I->add_elif(C.expr_raw("cond2"));
+  Elif2->directive_raw("raw_elif2_directive1");
+  Elif2->directive_raw("raw_elif2_directive2");
+  auto *Else = I->get_or_add_else();
+  Else->directive_raw("raw_else_directive1");
+  Else->directive_raw("raw_else_directive2");
+  EXPECT_EQ(F.to_string(), "\n#ifndef cond\n"
+                           "raw_then_directive1\n"
+                           "raw_then_directive2\n"
+                           "\n#elif cond1\n"
+                           "raw_elif1_directive1\n"
+                           "raw_elif1_directive2\n"
+                           "\n#elif cond2\n"
+                           "raw_elif2_directive1\n"
+                           "raw_elif2_directive2\n"
+                           "\n#else\n"
+                           "raw_else_directive1\n"
+                           "raw_else_directive2\n"
+                           "\n#endif\n\n");
+}
