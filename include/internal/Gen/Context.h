@@ -67,12 +67,18 @@ private:
     return add_decl(new ArrayVarDecl(Name, T, Size, Init));
   }
   FuncDecl *decl_func(std::string Name, Type *RetTy,
-                      std::vector<VarDecl *> Params) {
-    return add_decl(new FuncDecl(*this, Name, RetTy, Params));
+                      std::vector<VarDecl *> Params, bool IsVarArgs = false) {
+    return add_decl(new FuncDecl(*this, Name, RetTy, Params, IsVarArgs));
   }
-  StructDecl *decl_struct(Struct *S) { return add_decl(new StructDecl(S)); }
-  UnionDecl *decl_union(Union *U) { return add_decl(new UnionDecl(U)); }
-  EnumDecl *decl_enum(Enum *E) { return add_decl(new EnumDecl(E)); }
+  StructDecl *decl_struct(Struct *S, bool IsForward = false) {
+    return add_decl(new StructDecl(S, IsForward));
+  }
+  UnionDecl *decl_union(Union *U, bool IsForward = false) {
+    return add_decl(new UnionDecl(U, IsForward));
+  }
+  EnumDecl *decl_enum(Enum *E, bool IsForward = false) {
+    return add_decl(new EnumDecl(E, IsForward));
+  }
   TypedefDecl *decl_typedef(std::string Name, Type *T) {
     return add_decl(new TypedefDecl(type_typedef(Name, T)));
   }
@@ -141,6 +147,13 @@ public:
   GenericSelection *expr_generic_selection(Expr *ControllingExpr) {
     return add_expr(new GenericSelection(ControllingExpr));
   }
+  CallExpr *expr_va_arg(Expr *VaList, Type *T) {
+    return expr_call(expr_var_name("va_arg"), {VaList, expr_type(T)});
+  }
+  CallExpr *expr_sizeof(Type *T) {
+    return expr_call(expr_var_name("sizeof"), {expr_type(T)});
+  }
+  RawExpr *expr_type(Type *T) { return expr_raw(T->to_string()); }
 
   // Type factory APIs
 public:
@@ -186,12 +199,14 @@ public:
     ArrayTypeMap[ElmTy] = Ty;
     return Ty;
   }
-  Function *type_func(Type *RetTy, std::vector<Type *> Params) {
-    return add_type(new Function(RetTy, Params));
+  Function *type_func(Type *RetTy, std::vector<Type *> Params,
+                      bool IsVarArgs = false) {
+    return add_type(new Function(RetTy, Params, IsVarArgs));
   }
   Struct *type_struct(std::string Name) { return add_type(new Struct(Name)); }
   Union *type_union(std::string Name) { return add_type(new Union(Name)); }
   Enum *type_enum(std::string Name) { return add_type(new Enum(Name)); }
+  Type *type_va_list() { return get_or_add_raw_type("va_list"); }
 };
 } // namespace namec
 

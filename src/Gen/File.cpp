@@ -5,8 +5,8 @@
 using namespace namec;
 
 FuncDecl *TopLevel::def_func(std::string Name, Type *RetTy,
-                             std::vector<VarDecl *> Params) {
-  auto *F = C.decl_func(Name, RetTy, Params);
+                             std::vector<VarDecl *> Params, bool IsVarArg) {
+  auto *F = C.decl_func(Name, RetTy, Params, IsVarArg);
   Entries.push_back(F);
   return F;
 }

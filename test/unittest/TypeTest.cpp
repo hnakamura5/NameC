@@ -23,7 +23,7 @@ TEST(TypeTest, VoidTypeTest) {
 }
 
 TEST(TypeTest, NamedTypeTest) {
-  auto *T = C.type_name(new StructDecl(C.type_struct("struct_type")));
+  auto *T = C.type_name(new StructDecl(C.type_struct("struct_type"), false));
   EXPECT_EQ(T->to_string(), "struct struct_type");
 }
 

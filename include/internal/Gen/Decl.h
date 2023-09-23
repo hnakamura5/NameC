@@ -88,14 +88,15 @@ class FuncDecl : public Decl {
   std::vector<VarDecl *> Params;
   // Empty for declaration
   Scope *Body = nullptr;
+  bool IsVarArg;
 
   bool IsExtern = false;
   bool IsStatic = false;
 
 public:
   FuncDecl(Context &C, std::string Name, Type *RetTy,
-           std::vector<VarDecl *> Params)
-      : C(C), RetTy(RetTy), Name(Name), Params(Params) {}
+           std::vector<VarDecl *> Params, bool IsVarArg)
+      : C(C), RetTy(RetTy), Name(Name), Params(Params), IsVarArg(IsVarArg) {}
   Type *get_ret_type() { return RetTy; }
   std::string get_name() { return Name; }
   std::vector<VarDecl *> get_params() { return Params; }
@@ -104,6 +105,8 @@ public:
   bool is_extern() { return IsExtern; }
   void set_static(bool IsStatic) { this->IsStatic = IsStatic; }
   bool is_static() { return IsStatic; }
+  bool is_forward() { return !Body; }
+  bool is_vararg() { return IsVarArg; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -111,11 +114,13 @@ protected:
 
 class StructDecl : public Decl {
   Struct *S;
+  bool IsForward;
 
 public:
-  StructDecl(Struct *S) : S(S) {}
+  StructDecl(Struct *S, bool IsForward) : S(S), IsForward(IsForward) {}
   Struct *get_struct() { return S; }
   std::string get_name();
+  bool is_forward() { return IsForward; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -123,11 +128,13 @@ protected:
 
 class UnionDecl : public Decl {
   Union *U;
+  bool IsForward = false;
 
 public:
-  UnionDecl(Union *U) : U(U) {}
+  UnionDecl(Union *U, bool IsForward) : U(U), IsForward(IsForward) {}
   Union *get_union() { return U; }
   std::string get_name();
+  bool is_forward() { return IsForward; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -135,11 +142,13 @@ protected:
 
 class EnumDecl : public Decl {
   Enum *E;
+  bool IsForward = false;
 
 public:
-  EnumDecl(Enum *E) : E(E) {}
+  EnumDecl(Enum *E, bool IsForward) : E(E), IsForward(IsForward) {}
   Enum *get_enum() { return E; }
   std::string get_name();
+  bool is_forward() { return IsForward; }
 
 protected:
   void emit_impl(std::ostream &SS) override;

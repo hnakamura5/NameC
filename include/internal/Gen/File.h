@@ -31,7 +31,7 @@ public:
       : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
   // Only in top level we can define/declare functions
   FuncDecl *def_func(std::string Name, Type *RetTy,
-                     std::vector<VarDecl *> Params);
+                     std::vector<VarDecl *> Params, bool IsVarArg = false);
 
 protected:
   void emit_impl(std::ostream &SS) override;

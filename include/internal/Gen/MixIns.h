@@ -100,19 +100,27 @@ public:
   RawStmt *stmt_raw(std::string Val);
   RawStmt *stmt_empty();
   DeclStmt *stmt_decl(Decl *D);
+  ExprStmt *stmt_expr(Expr *E);
   IfStmt *stmt_if(Expr *Cond);
   WhileStmt *stmt_while(Expr *Cond);
   ForStmt *stmt_for(VarDecl *Init, Expr *Cond, Expr *Step);
   ForStmt *stmt_for(Expr *Init, Expr *Cond, Expr *Step);
   DoStmt *stmt_do(Expr *Cond);
   BlockStmt *stmt_block();
-  ExprStmt *stmt_expr(Expr *E);
   ReturnStmt *stmt_return(Expr *Val = nullptr);
   BreakStmt *stmt_break();
   ContinueStmt *stmt_continue();
   LabelStmt *stmt_label(std::string Name, Stmt *S = nullptr);
   GotoStmt *stmt_goto(std::string Name);
   SwitchStmt *stmt_switch(Expr *Cond);
+
+  // Compound APIs for convenience
+  ExprStmt *stmt_assign(Expr *LHS, Expr *RHS);
+  ExprStmt *stmt_call(Expr *Callee, std::vector<Expr *> Args);
+  VarDecl *stmt_va_list(std::string Name);
+  ExprStmt *stmt_va_start(Expr *VaList, Expr *Count);
+  ExprStmt *stmt_va_copy(Expr *Dest, Expr *Src);
+  ExprStmt *stmt_va_end(Expr *Arg);
 };
 
 } // namespace namec

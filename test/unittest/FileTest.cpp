@@ -29,3 +29,26 @@ TEST(FileTest, FileOutPut) {
   IS.close();
   std::filesystem::remove(P);
 }
+
+TEST(FileTest, VarArgFunc) {
+  CFile F(C);
+  auto *T = F.get_first_top_level();
+  auto *Arg1 = C.decl_var("arg1", C.type_float());
+  auto *Arg2 = C.decl_var("arg2", C.type_int());
+  auto *VaFunc = T->def_func("vafunc", C.type_void(), {Arg1, Arg2}, true);
+  EXPECT_TRUE(VaFunc->is_vararg());
+  EXPECT_TRUE(VaFunc->is_forward());
+  auto *Body = VaFunc->get_or_add_body();
+  EXPECT_FALSE(VaFunc->is_forward());
+  auto *Args = Body->stmt_va_list("args");
+  Body->stmt_va_start(C.expr_var(Args), C.expr_var(Arg2));
+  Body->def_var("Arg3", C.type_int(),
+                C.expr_va_arg(C.expr_var(Args), C.type_int()));
+  Body->stmt_va_end(C.expr_var(Args));
+  EXPECT_EQ(F.to_string(), "void vafunc(float arg1,int arg2,...){"
+                           "va_list args;"
+                           "va_start(args,arg2);"
+                           "int Arg3=va_arg(args,int);"
+                           "va_end(args);"
+                           "}\n\n");
+}

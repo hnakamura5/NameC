@@ -81,12 +81,14 @@ protected:
 class Function : public Type {
   Type *RetTy;
   std::vector<Type *> Params;
+  bool IsVarArg;
 
 public:
-  Function(Type *RetTy, std::vector<Type *> Params)
-      : RetTy(RetTy), Params(Params) {}
+  Function(Type *RetTy, std::vector<Type *> Params, bool IsVarArg)
+      : RetTy(RetTy), Params(Params), IsVarArg(IsVarArg) {}
   Type *get_ret_type() { return RetTy; }
   std::vector<Type *> get_params() { return Params; }
+  bool is_vararg() { return IsVarArg; }
 
 protected:
   void emit_impl(std::ostream &SS) override;

@@ -113,6 +113,10 @@ DeclStmt *InFunctionStmtMixIn::stmt_decl(Decl *D) {
   return add(new DeclStmt(C, D));
 }
 
+ExprStmt *InFunctionStmtMixIn::stmt_expr(Expr *E) {
+  return add(new ExprStmt(C, E));
+}
+
 IfStmt *InFunctionStmtMixIn::stmt_if(Expr *Cond) {
   return add(new IfStmt(C, Cond));
 }
@@ -138,9 +142,6 @@ DoStmt *InFunctionStmtMixIn::stmt_do(Expr *Cond) {
 }
 
 BlockStmt *InFunctionStmtMixIn::stmt_block() { return add(new BlockStmt(C)); }
-ExprStmt *InFunctionStmtMixIn::stmt_expr(Expr *E) {
-  return add(new ExprStmt(C, E));
-}
 
 ReturnStmt *InFunctionStmtMixIn::stmt_return(Expr *Val) {
   return add(new ReturnStmt(C, Val));
@@ -161,4 +162,31 @@ GotoStmt *InFunctionStmtMixIn::stmt_goto(std::string Name) {
 
 SwitchStmt *InFunctionStmtMixIn::stmt_switch(Expr *Cond) {
   return add(new SwitchStmt(C, Cond));
+}
+
+ExprStmt *InFunctionStmtMixIn::stmt_assign(Expr *LHS, Expr *RHS) {
+  return stmt_expr(C.expr_binary("=", LHS, RHS));
+}
+
+ExprStmt *InFunctionStmtMixIn::stmt_call(Expr *Callee,
+                                         std::vector<Expr *> Args) {
+  return stmt_expr(C.expr_call(Callee, Args));
+}
+
+VarDecl *InFunctionStmtMixIn::stmt_va_list(std::string Name) {
+  auto *D = C.decl_var(Name, C.type_va_list());
+  add(new DeclStmt(C, D));
+  return D;
+}
+
+ExprStmt *InFunctionStmtMixIn::stmt_va_start(Expr *VaList, Expr *Count) {
+  return stmt_call(C.expr_var_name("va_start"), {VaList, Count});
+}
+
+ExprStmt *InFunctionStmtMixIn::stmt_va_end(Expr *Arg) {
+  return stmt_call(C.expr_var_name("va_end"), {Arg});
+}
+
+ExprStmt *InFunctionStmtMixIn::stmt_va_copy(Expr *Dest, Expr *Src) {
+  return stmt_call(C.expr_var_name("va_copy"), {Dest, Src});
 }

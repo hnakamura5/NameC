@@ -24,7 +24,7 @@ void VarDecl::emit_impl(std::ostream &SS) {
   }
   SS << get_name();
   if (get_init()) {
-    SS << " = ";
+    SS << "=";
     get_init()->emit(SS);
   }
 }
@@ -77,9 +77,14 @@ void FuncDecl::emit_impl(std::ostream &SS) {
   SS << " ";
   SS << get_name();
   SS << "(";
-  for (auto P : get_params()) {
-    P->emit(SS);
-    SS << ", ";
+  for (auto I = 0; I < Params.size(); ++I) {
+    Params[I]->emit(SS);
+    if (I != Params.size() - 1) {
+      SS << ",";
+    }
+  }
+  if (is_vararg()) {
+    SS << ",...";
   }
   SS << ")";
   if (Body) {
@@ -90,10 +95,28 @@ void FuncDecl::emit_impl(std::ostream &SS) {
 }
 
 std::string StructDecl::get_name() { return S->get_name(); }
-void StructDecl::emit_impl(std::ostream &SS) { S->emit(SS); }
+void StructDecl::emit_impl(std::ostream &SS) {
+  if (IsForward) {
+    SS << "struct " << get_name();
+  } else {
+    S->emit(SS);
+  }
+}
 
 std::string UnionDecl::get_name() { return U->get_name(); }
-void UnionDecl::emit_impl(std::ostream &SS) { U->emit(SS); }
+void UnionDecl::emit_impl(std::ostream &SS) {
+  if (IsForward) {
+    SS << "union " << get_name();
+  } else {
+    U->emit(SS);
+  }
+}
 
 std::string EnumDecl::get_name() { return E->get_name(); }
-void EnumDecl::emit_impl(std::ostream &SS) { E->emit(SS); }
+void EnumDecl::emit_impl(std::ostream &SS) {
+  if (IsForward) {
+    SS << "enum " << get_name();
+  } else {
+    E->emit(SS);
+  }
+}
