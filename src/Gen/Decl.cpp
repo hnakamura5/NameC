@@ -83,7 +83,11 @@ void FuncDecl::emit_impl(std::ostream &SS) {
       SS << ",";
     }
   }
+<<<<<<< HEAD
   if (is_vararg()) {
+=======
+  if (is_vaarg()) {
+>>>>>>> 8612cf1 (Implemented va_args and forward declaration)
     SS << ",...";
   }
   SS << ")";

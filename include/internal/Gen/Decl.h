@@ -88,15 +88,24 @@ class FuncDecl : public Decl {
   std::vector<VarDecl *> Params;
   // Empty for declaration
   Scope *Body = nullptr;
+<<<<<<< HEAD
   bool IsVarArg;
+=======
+  bool IsVaArg;
+>>>>>>> 8612cf1 (Implemented va_args and forward declaration)
 
   bool IsExtern = false;
   bool IsStatic = false;
 
 public:
   FuncDecl(Context &C, std::string Name, Type *RetTy,
+<<<<<<< HEAD
            std::vector<VarDecl *> Params, bool IsVarArg)
       : C(C), RetTy(RetTy), Name(Name), Params(Params), IsVarArg(IsVarArg) {}
+=======
+           std::vector<VarDecl *> Params, bool IsVaArg)
+      : C(C), RetTy(RetTy), Name(Name), Params(Params), IsVaArg(IsVaArg) {}
+>>>>>>> 8612cf1 (Implemented va_args and forward declaration)
   Type *get_ret_type() { return RetTy; }
   std::string get_name() { return Name; }
   std::vector<VarDecl *> get_params() { return Params; }
@@ -106,7 +115,11 @@ public:
   void set_static(bool IsStatic) { this->IsStatic = IsStatic; }
   bool is_static() { return IsStatic; }
   bool is_forward() { return !Body; }
+<<<<<<< HEAD
   bool is_vararg() { return IsVarArg; }
+=======
+  bool is_vaarg() { return IsVaArg; }
+>>>>>>> 8612cf1 (Implemented va_args and forward declaration)
 
 protected:
   void emit_impl(std::ostream &SS) override;
