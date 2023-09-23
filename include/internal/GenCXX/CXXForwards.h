@@ -1,10 +1,36 @@
 #ifndef NAMEC_GENCXX_FORWARDS_H
 #define NAMEC_GENCXX_FORWARDS_H
 
-// CXX definitions does not affect on C gen library. We can include all without
-// risk of cyclic include.
-#include "internal/Gen.h"
+#include <iosfwd>
+#include <map>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <vector>
 
-namespace namecxx {} // namespace namecxx
+#include "internal/Util/IteratorRange.h"
+#include "internal/Util/VUIterator.h"
+
+using namespace namec_util;
+
+namespace namecxx {
+class CXXFile;
+class Context;
+class Scope;
+class MacroFuncScope;
+class Expr;
+class Stmt;
+class Type;
+class Struct;
+class Union;
+class Enum;
+class Decl;
+class TopLevel;
+class Directive;
+class TypeAlias;
+class Attribute;
+class QualNameExpr;
+} // namespace namecxx
 
 #endif

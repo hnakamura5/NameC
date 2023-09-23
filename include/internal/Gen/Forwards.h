@@ -12,6 +12,8 @@
 #include "internal/Util/IteratorRange.h"
 #include "internal/Util/VUIterator.h"
 
+using namespace namec_util;
+
 namespace namec {
 class CFile;
 class Context;

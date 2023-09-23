@@ -6,8 +6,6 @@
 #include "internal/Gen/Forwards.h"
 
 namespace namec {
-// To eliminate circular dependency of Scope constructor
-
 class Stmt : public Emit {
 protected:
   Context &C;

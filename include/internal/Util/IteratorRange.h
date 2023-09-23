@@ -1,7 +1,7 @@
 #ifndef NAMEC_UTIL_ITERATOR_RANGE_H
 #define NAMEC_UTIL_ITERATOR_RANGE_H
 
-namespace namec {
+namespace namec_util {
 template <typename IteratorT> class IteratorRange {
   IteratorT Begin;
   IteratorT End;
@@ -21,6 +21,6 @@ public:
   IteratorT end() const { return End; }
   bool empty() const { return Begin == End; }
 };
-} // namespace namec
+} // namespace namec_util
 
 #endif // NAMEC_UTIL_ITERATOR_RANGE_H

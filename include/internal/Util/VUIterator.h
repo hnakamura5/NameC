@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-namespace namec {
+namespace namec_util {
 template <typename T>
 class VUIterator : public std::iterator<std::forward_iterator_tag, T> {
   std::vector<std::unique_ptr<T>> *Vec;
@@ -37,6 +37,6 @@ public:
 
   T *operator->() const { return Vec->at(Index).get(); }
 };
-} // namespace namec
+} // namespace namec_util
 
 #endif // NAMEC_UTIL_VU_ITERATOR_H
