@@ -90,6 +90,7 @@ class FuncDecl : public Decl {
   std::vector<VarDecl *> Params;
   // Empty for declaration
   Scope *Body = nullptr;
+  bool IsVaArg;
 
   bool IsExtern = false;
   bool IsStatic = false;
@@ -100,8 +101,8 @@ class FuncDecl : public Decl {
 
 public:
   FuncDecl(Context &C, std::string Name, Type *RetTy,
-           std::vector<VarDecl *> Params)
-      : C(C), RetTy(RetTy), Name(Name), Params(Params) {}
+           std::vector<VarDecl *> Params, bool IsVaArg)
+      : C(C), RetTy(RetTy), Name(Name), Params(Params), IsVaArg(IsVaArg) {}
   Type *get_ret_type() { return RetTy; }
   std::string get_name() { return Name; }
   std::vector<VarDecl *> get_params() { return Params; }
@@ -110,6 +111,8 @@ public:
   bool is_extern() { return IsExtern; }
   void set_static(bool IsStatic) { this->IsStatic = IsStatic; }
   bool is_static() { return IsStatic; }
+  bool is_forward() { return !Body; }
+  bool is_vaarg() { return IsVaArg; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -117,11 +120,13 @@ protected:
 
 class StructDecl : public Decl {
   Struct *S;
+  bool IsForward;
 
 public:
-  StructDecl(Struct *S) : S(S) {}
+  StructDecl(Struct *S, bool IsForward) : S(S), IsForward(IsForward) {}
   Struct *get_struct() { return S; }
   std::string get_name();
+  bool is_forward() { return IsForward; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -129,11 +134,13 @@ protected:
 
 class UnionDecl : public Decl {
   Union *U;
+  bool IsForward = false;
 
 public:
-  UnionDecl(Union *U) : U(U) {}
+  UnionDecl(Union *U, bool IsForward) : U(U), IsForward(IsForward) {}
   Union *get_union() { return U; }
   std::string get_name();
+  bool is_forward() { return IsForward; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -141,48 +148,13 @@ protected:
 
 class EnumDecl : public Decl {
   Enum *E;
+  bool IsForward = false;
 
 public:
-  EnumDecl(Enum *E) : E(E) {}
+  EnumDecl(Enum *E, bool IsForward) : E(E), IsForward(IsForward) {}
   Enum *get_enum() { return E; }
   std::string get_name();
-
-protected:
-  void emit_impl(std::ostream &SS) override;
-};
-
-class ClassDecl : public Decl {
-  Class *C;
-
-public:
-  ClassDecl(Class *C) : C(C) {}
-  Class *get_class() { return C; }
-  std::string get_name();
-
-protected:
-  void emit_impl(std::ostream &SS) override;
-};
-
-class EnumClassDecl : public Decl {
-  EnumClass *EC;
-
-public:
-  EnumClassDecl(EnumClass *EC) : EC(EC) {}
-  EnumClass *get_enum_class() { return EC; }
-  std::string get_name();
-
-protected:
-  void emit_impl(std::ostream &SS) override;
-};
-
-class UsingDecl : public Decl {
-  std::string Name;
-  Type *T;
-
-public:
-  UsingDecl(std::string Name, Type *T) : Name(Name), T(T) {}
-  std::string get_name() { return Name; }
-  Type *get_type() { return T; }
+  bool is_forward() { return IsForward; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
