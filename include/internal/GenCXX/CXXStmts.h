@@ -1,3 +1,7 @@
+#ifdef NAMEC_GENCXX_STMTS_H_CYCLIC
+static_assert(false, "Cyclic include detected of " __FILE__);
+#endif
+#define NAMEC_GENCXX_STMTS_H_CYCLIC
 #ifndef NAMEC_GENCXX_STMTS_H
 #define NAMEC_GENCXX_STMTS_H
 
@@ -41,27 +45,27 @@ protected:
 class IfStmt : public Stmt {
   VarDecl *Init;
   Expr *Cond;
-  Scope *Then;
-  std::vector<std::pair<Expr *, Scope *>> Elseifs;
-  Scope *Else = nullptr;
+  FuncScope *Then;
+  std::vector<std::tuple<Expr *, FuncScope *, VarDecl *>> Elseifs;
+  FuncScope *Else = nullptr;
   bool IsConstExpr;
 
 public:
   IfStmt(Context &C, Expr *Cond, VarDecl *Init = nullptr,
          bool IsConstExpr = false)
-      : Stmt(C), Cond(Cond), Then(C.add_scope()), Init(Init),
+      : Stmt(C), Cond(Cond), Then(C.add_func_scope()), Init(Init),
         IsConstExpr(IsConstExpr) {}
   Expr *get_cond() { return Cond; }
   VarDecl *get_init() { return Init; }
-  Scope *get_then() { return Then; }
-  Scope *add_elseif(Expr *Cond) {
-    auto S = C.add_scope();
-    Elseifs.push_back({Cond, S});
+  FuncScope *get_then() { return Then; }
+  FuncScope *add_elseif(Expr *Cond, VarDecl *Init = nullptr) {
+    auto S = C.add_func_scope();
+    Elseifs.push_back({Cond, S, Init});
     return S;
   }
-  Scope *get_or_add_else() {
+  FuncScope *get_or_add_else() {
     if (!Else) {
-      Else = C.add_scope();
+      Else = C.add_func_scope();
     }
     return Else;
   }
@@ -74,13 +78,13 @@ protected:
 
 class WhileStmt : public Stmt {
   Expr *Cond;
-  Scope *Body;
+  FuncScope *Body;
 
 public:
   WhileStmt(Context &C, Expr *Cond)
-      : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
+      : Stmt(C), Cond(Cond), Body(C.add_func_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -90,17 +94,17 @@ class ForStmt : public Stmt {
   std::unique_ptr<Stmt> Init;
   Expr *Cond;
   Expr *Step;
-  Scope *Body;
+  FuncScope *Body;
 
 public:
   ForStmt(Context &C, std::unique_ptr<Stmt> Init, Expr *Cond, Expr *Step)
-      : Stmt(C), Cond(Cond), Step(Step), Body(C.add_scope()) {
+      : Stmt(C), Cond(Cond), Step(Step), Body(C.add_func_scope()) {
     this->Init = std::move(Init);
   }
   Stmt *get_init() { return Init.get(); }
   Expr *get_cond() { return Cond; }
   Expr *get_step() { return Step; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -109,14 +113,14 @@ protected:
 class ForRangeStmt : public Stmt {
   Decl *D;
   Expr *Range;
-  Scope *Body;
+  FuncScope *Body;
 
 public:
   ForRangeStmt(Context &C, Decl *D, Expr *Range)
-      : Stmt(C), D(D), Range(Range), Body(C.add_scope()) {}
+      : Stmt(C), D(D), Range(Range), Body(C.add_func_scope()) {}
   Decl *get_decl() { return D; }
   Expr *get_range() { return Range; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -124,23 +128,24 @@ protected:
 
 class DoStmt : public Stmt {
   Expr *Cond;
-  Scope *Body;
+  FuncScope *Body;
 
 public:
-  DoStmt(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
+  DoStmt(Context &C, Expr *Cond)
+      : Stmt(C), Cond(Cond), Body(C.add_func_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
 };
 
 class BlockStmt : public Stmt {
-  Scope *S;
+  FuncScope *S;
 
 public:
-  BlockStmt(Context &C) : Stmt(C), S(C.add_scope()) {}
-  Scope *get_scope() { return S; }
+  BlockStmt(Context &C) : Stmt(C), S(C.add_func_scope()) {}
+  FuncScope *get_scope() { return S; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -191,7 +196,7 @@ class LabelStmt : public Stmt {
 public:
   LabelStmt(Context &C, std::string Name, Stmt *S = nullptr)
       : Stmt(C), Name(Name), S(S) {}
-  std::string get_name() { return Name; }
+  std::string get_label_name() { return Name; }
   Stmt *get_stmt() { return S; }
 
 protected:
@@ -203,7 +208,7 @@ class GotoStmt : public Stmt {
 
 public:
   GotoStmt(Context &C, std::string Name) : Stmt(C), Name(Name) {}
-  std::string get_name() { return Name; }
+  std::string get_label_name() { return Name; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -211,16 +216,17 @@ protected:
 
 class CaseStmt : public Stmt {
   Expr *Val; //  nullptr for default
-  Scope *Body;
+  FuncScope *Body;
   bool IsFallThrough;
 
 public:
   CaseStmt(Context &C, Expr *Val = nullptr, bool IsFallThrough = false)
-      : Stmt(C), Val(Val), IsFallThrough(IsFallThrough), Body(C.add_scope()) {}
+      : Stmt(C), Val(Val), IsFallThrough(IsFallThrough),
+        Body(C.add_func_scope()) {}
   Expr *get_val() { return Val; }
   bool is_default() { return Val == nullptr; }
   bool is_fall_through() { return IsFallThrough; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -244,7 +250,7 @@ protected:
 };
 
 class ThrowStmt : public Stmt {
-  Expr *E;
+  Expr *E; // nullptr for rethrow
 
 public:
   ThrowStmt(Context &C, Expr *E) : Stmt(C), E(E) {}
@@ -255,14 +261,15 @@ protected:
 };
 
 class TryStmt : public Stmt {
-  Scope *Body;
-  std::vector<std::pair<VarDecl *, Scope *>> Handlers;
+  FuncScope *Body;
+  std::vector<std::pair<VarDecl *, FuncScope *>> Handlers;
 
 public:
-  TryStmt(Context &C) : Stmt(C), Body(C.add_scope()) {}
-  Scope *get_body() { return Body; }
-  Scope *add_handler(VarDecl *D) {
-    auto S = C.add_scope();
+  TryStmt(Context &C) : Stmt(C), Body(C.add_func_scope()) {}
+  FuncScope *get_body() { return Body; }
+  // nullptr  for catch(...)
+  FuncScope *add_handler(VarDecl *D = nullptr) {
+    auto S = C.add_func_scope();
     Handlers.push_back({D, S});
     return S;
   }
@@ -274,3 +281,4 @@ protected:
 } // namespace namecxx
 
 #endif // NAMEC_GENCXX_STMTS_H
+#undef NAMEC_GENCXX_STMTS_H_CYCLIC

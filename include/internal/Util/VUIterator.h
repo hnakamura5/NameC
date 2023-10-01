@@ -37,6 +37,7 @@ public:
 
   T *operator->() const { return Vec->at(Index).get(); }
 };
+
 } // namespace namec_util
 
 #endif // NAMEC_UTIL_VU_ITERATOR_H

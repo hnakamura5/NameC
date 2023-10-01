@@ -13,6 +13,7 @@ protected:
   virtual void emit_impl(std::ostream &SS) = 0;
 
 public:
+  virtual ~Emit() {}
   void set_comment_before(std::string CommentBefore) {
     this->CommentBefore = CommentBefore;
   }
@@ -22,7 +23,7 @@ public:
   }
   std::string get_comment_after() { return CommentAfter; }
 
-  void emit(std::ostream &SS) {
+  virtual void emit(std::ostream &SS) {
     if (!CommentBefore.empty()) {
       SS << "/* " << CommentBefore << " */";
     }
@@ -39,20 +40,57 @@ public:
   }
 };
 
-class QualName : public Emit {
+class AttrEmit : public Emit {
+  std::vector<Attribute *> Attrs;
+
+public:
+  using attr_iterator = decltype(Attrs)::iterator;
+  void add_attr(Attribute *Attr) { Attrs.push_back(Attr); }
+  IteratorRange<attr_iterator> attrs() {
+    return IteratorRange<attr_iterator>(Attrs.begin(), Attrs.end());
+  }
+  void emit(std::ostream &SS) override;
+};
+
+class TypeOrExpr : public Emit {};
+
+class QualName {
   std::vector<std::string> Names;
 
 public:
   using iterator = decltype(Names)::iterator;
   QualName(std::vector<std::string> Names) : Names(Names) {}
+  QualName(std::string Name) { Names.push_back(Name); }
+  QualName(const char *Name) { Names.push_back(Name); }
   std::vector<std::string> get_names() { return Names; }
   IteratorRange<iterator> names() {
     return IteratorRange<iterator>(Names.begin(), Names.end());
   }
-
-protected:
-  void emit_impl(std::ostream &SS) override;
+  std::string to_string() const;
 };
+
+template <typename OS> OS &operator<<(OS &SS, Emit *E) {
+  E->emit(SS);
+  return SS;
+}
+
+template <typename OS, typename IterT>
+OS &join_out(OS &SS, IteratorRange<IterT> Range, std::string Sep = ",") {
+  for (auto I = Range.begin(), E = Range.end(); I != E; ++I) {
+    if (I != Range.begin()) {
+      SS << Sep;
+    }
+    SS << *I;
+    return SS;
+  }
+}
+
+template <typename IterT>
+std::string join(IteratorRange<IterT> Range, std::string Sep = ",") {
+  std::stringstream SS;
+  join_out(SS, Range, Sep);
+  return SS.str();
+}
 
 } // namespace namecxx
 

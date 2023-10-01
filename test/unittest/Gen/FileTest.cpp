@@ -36,11 +36,7 @@ TEST(FileTest, VarArgFunc) {
   auto *Arg1 = C.decl_var("arg1", C.type_float());
   auto *Arg2 = C.decl_var("arg2", C.type_int());
   auto *VaFunc = T->def_func("vafunc", C.type_void(), {Arg1, Arg2}, true);
-<<<<<<< HEAD
   EXPECT_TRUE(VaFunc->is_vararg());
-=======
-  EXPECT_TRUE(VaFunc->is_vaarg());
->>>>>>> 8612cf1 (Implemented va_args and forward declaration)
   EXPECT_TRUE(VaFunc->is_forward());
   auto *Body = VaFunc->get_or_add_body();
   EXPECT_FALSE(VaFunc->is_forward());

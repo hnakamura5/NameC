@@ -29,6 +29,33 @@ TEST(StmtTest, DeclStmtTest) {
   EXPECT_EQ(E->to_string(), "int var;");
 }
 
+TEST(StmtTest, DeclStmtWithInitTest) {
+  VarDecl D("var", C.type_int(), C.expr_int(1));
+  auto *E = S.stmt_decl(&D);
+  EXPECT_EQ(E->to_string(), "int var=1;");
+}
+
+TEST(StmtTest, ArrayDeclStmtTest) {
+  ArrayVarDecl D("var", C.type_int(), {C.expr_int(1), C.expr_int(2)});
+  auto *E = S.stmt_decl(&D);
+  EXPECT_EQ(E->to_string(), "int var[1][2];");
+}
+
+TEST(StmtTest, ArrayDeclStmtWithInitTest) {
+  ArrayVarDecl D("var", C.type_int(), {C.expr_int(1), C.expr_int(2)},
+                 C.expr_int(3));
+  auto *E = S.stmt_decl(&D);
+  EXPECT_EQ(E->to_string(), "int var[1][2]=3;");
+}
+
+TEST(StmtTest, StructDeclStmtTest) {
+  Scope S(C); // Local scope
+  auto *Str = S.def_struct("Str")->get_struct();
+  Str->def_member("field1", C.type_int());
+  Str->def_member("field2", C.type_int());
+  EXPECT_EQ(S.to_string(), "struct struct{int field;};");
+}
+
 TEST(StmtTest, IfStmtTest) {
   auto *I = S.stmt_if(C.expr_raw("cond"));
   auto *Then = I->get_then();

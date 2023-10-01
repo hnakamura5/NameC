@@ -1,30 +1,26 @@
-#include "internal/Gen.h"
+#include "internal/GenCXX.h"
 
-using namespace namec;
+using namespace namecxx;
 
 void RawDirective::emit_impl(std::ostream &SS) { SS << get_val(); }
 
 void Include::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#include \"";
-  SS << get_path();
+  SS << "#include \"" << get_path();
   SS << "\"\n";
 }
 
 void SystemInclude::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#include <";
-  SS << get_path();
+  SS << "#include <" << get_path();
   SS << ">\n";
 }
 
 void Define::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#define ";
-  SS << get_name();
+  SS << "#define " << get_name();
   if (!get_value().empty()) {
-    SS << " ";
-    SS << get_value();
+    SS << " " << get_value();
   }
   SS << "\n";
 }
@@ -37,67 +33,50 @@ DefineFuncMacro::DefineFuncMacro(Context &C, std::string Name,
 
 void DefineFuncMacro::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#define ";
-  SS << get_name();
-  SS << "(";
-  for (auto I = 0; I < Args.size(); ++I) {
-    SS << Args[I];
-    if (I != Args.size() - 1) {
-      SS << ",";
-    }
-  }
-  SS << ") ";
-  get_body()->emit(SS);
+  SS << "#define " << get_name() << "(" << join(args()) << ") ";
+  SS << get_body();
   SS << "\n";
 }
 
 void Undef::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#undef ";
-  SS << get_name();
+  SS << "#undef " << get_name();
   SS << "\n";
 }
 
 void Pragma::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#pragma ";
-  SS << get_value();
+  SS << "#pragma " << get_value();
   SS << "\n";
 }
 
-IfDirectiveBase::IfDirectiveBase(Context &C) : C(C) {
-  Then.reset(new TopLevel(C));
-}
-
 TopLevel *IfDirectiveBase::add_elif(Expr *Cond) {
-  auto E = std::make_unique<TopLevel>(C);
-  auto *Ret = E.get();
-  Elifs.push_back({Cond, std::move(E)});
+  auto *Ret = C.add_top_level();
+  Elifs.push_back({Cond, Ret});
   return Ret;
 }
 
 TopLevel *IfDirectiveBase::get_or_add_else() {
   if (!Else) {
-    Else.reset(new TopLevel(C));
+    Else = C.add_top_level();
   }
-  return Else.get();
+  return Else;
 }
 
 void IfDirectiveBase::emit_impl(std::ostream &SS) {
   // Other part than #if, #ifdef, #ifndef
   SS << "\n";
-  get_then()->emit(SS);
+  SS << get_then();
   for (auto &[ElifCond, ElifThen] : Elifs) {
     SS << "\n";
-    SS << "#elif ";
-    ElifCond->emit(SS);
+    SS << "#elif " << ElifCond;
     SS << "\n";
-    ElifThen->emit(SS);
+    SS << ElifThen;
   }
   SS << "\n";
   if (has_else()) {
     SS << "#else\n";
-    Else->emit(SS);
+    SS << Else;
     SS << "\n";
   }
   SS << "#endif\n";
@@ -108,21 +87,35 @@ IfDirective::IfDirective(Context &C, Expr *Cond)
 
 void IfDirective::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#if ";
-  get_cond()->emit(SS);
+  SS << "#if " << get_cond();
   IfDirectiveBase::emit_impl(SS);
 }
 
 void Ifdef::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#ifdef ";
-  SS << get_cond();
+  SS << "#ifdef " << get_cond();
   IfDirectiveBase::emit_impl(SS);
 }
 
 void Ifndef::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#ifndef ";
-  SS << get_cond();
+  SS << "#ifndef " << get_cond();
   IfDirectiveBase::emit_impl(SS);
+}
+
+void Namespace::emit_impl(std::ostream &SS) {
+  SS << "\n";
+  SS << "namespace " << get_name_str() << "{";
+  SS << get_body();
+  SS << "}";
+}
+
+void UsingNamespace::emit_impl(std::ostream &SS) {
+  SS << "\n";
+  SS << "using namespace " << get_name_str() << ";";
+}
+
+void UsingDirective::emit_impl(std::ostream &SS) {
+  SS << "\n";
+  SS << "using " << get_name_str() << ";";
 }

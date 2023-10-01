@@ -60,7 +60,7 @@ public:
 
 private:
   // Decl factory APIs. Not public to user. Intended to be used by internal
-  // construction in File and Scope.
+  // VarInitialize in File and Scope.
   RawDecl *decl_raw(std::string Val) { return add_decl(new RawDecl(Val)); }
   ArrayVarDecl *decl_array_var(std::string Name, Type *T,
                                std::vector<Expr *> Size, Expr *Init = nullptr) {

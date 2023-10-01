@@ -6,12 +6,15 @@
 #include "internal/GenCXX/CXXDecl.h"
 #include "internal/GenCXX/CXXExprs.h"
 #include "internal/GenCXX/CXXForwards.h"
+#include "internal/GenCXX/CXXScope.h"
 #include "internal/GenCXX/CXXStmts.h"
 #include "internal/GenCXX/CXXTypes.h"
 
 namespace namecxx {
 // standard way to cast a pointer
-template <typename T, typename S> const auto cast = namec::cast<T, S>;
+template <typename T, typename S> T *cast(S *Ptr) {
+  return dynamic_cast<T *>(Ptr);
+}
 
 } // namespace namecxx
 

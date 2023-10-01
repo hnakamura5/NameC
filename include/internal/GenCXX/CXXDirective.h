@@ -1,6 +1,11 @@
+#ifdef NAMEC_GENCXX_DIRECTIVE_H_CYCLIC
+static_assert(false, "Cyclic include detected of " __FILE__);
+#endif
+#define NAMEC_GENCXX_DIRECTIVE_H_CYCLIC
 #ifndef NAMEC_GENCXX_DIRECTIVE_H
 #define NAMEC_GENCXX_DIRECTIVE_H
 
+#include "internal/GenCXX/CXXCommon.h"
 #include "internal/GenCXX/CXXForwards.h"
 
 namespace namecxx {
@@ -8,7 +13,7 @@ namespace namecxx {
 class Directive : public Emit {
 
 public:
-  virtual ~Directive() = default;
+  virtual ~Directive() {}
   virtual void emit_impl(std::ostream &SS) = 0;
 };
 
@@ -106,17 +111,17 @@ class IfDirectiveBase : public Directive {
   Context &C;
 
 protected:
-  std::unique_ptr<TopLevel> Then;
-  std::vector<std::pair<Expr *, std::unique_ptr<TopLevel>>> Elifs;
-  std::unique_ptr<TopLevel> Else;
+  TopLevel *Then;
+  std::vector<std::pair<Expr *, TopLevel *>> Elifs;
+  TopLevel *Else;
 
   // TODO: elif
 
 public:
-  IfDirectiveBase(Context &C);
-  TopLevel *get_then() { return Then.get(); }
+  IfDirectiveBase(Context &C) : C(C), Then(C.add_top_level()) {}
+  TopLevel *get_then() { return Then; }
   TopLevel *add_elif(Expr *Cond);
-  bool has_else() { return Else.get() != nullptr; }
+  bool has_else() { return Else != nullptr; }
   TopLevel *get_or_add_else();
 
 protected:
@@ -159,33 +164,48 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+// namespace Name {Body}
 class Namespace : public Directive {
-  QualNameExpr *Name;
-  std::unique_ptr<TopLevel> Body;
+  QualName Name;
+  TopLevel *Body;
 
 public:
-  class UsingNamespace : public Directive {
-    QualNameExpr *Name;
+  Namespace(Context &C, QualName Name) : Name(Name), Body(C.add_top_level()) {}
+  QualName get_name() { return Name; }
+  std::string get_name_str() { return Name.to_string(); }
+  TopLevel *get_body() { return Body; }
 
-  public:
-    UsingNamespace(QualNameExpr *Name) : Name(Name) {}
-    QualNameExpr *get_name() { return Name; }
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
 
-  protected:
-    void emit_impl(std::ostream &SS) override;
-  };
+// using namespace QualName;
+class UsingNamespace : public Directive {
+  QualName Name;
 
-  class UsingDirective : public Directive {
-    QualNameExpr *Name;
+public:
+  UsingNamespace(QualName Name) : Name(Name) {}
+  QualName get_name() { return Name; }
+  std::string get_name_str() { return Name.to_string(); }
 
-  public:
-    UsingDirective(QualNameExpr *Name) : Name(Name) {}
-    QualNameExpr *get_name() { return Name; }
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
 
-  protected:
-    void emit_impl(std::ostream &SS) override;
-  };
+// using QualName; (spot name importing to current scope)
+class UsingDirective : public Directive {
+  QualName Name;
+
+public:
+  UsingDirective(QualName Name) : Name(Name) {}
+  QualName get_name() { return Name; }
+  std::string get_name_str() { return Name.to_string(); }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
 
 } // namespace namecxx
 
 #endif // NAMEC_GENCXX_DIRECTIVE_H
+#undef NAMEC_GENCXX_DIRECTIVE_H_CYCLIC

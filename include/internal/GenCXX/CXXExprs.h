@@ -1,3 +1,7 @@
+#ifdef NAMEC_GENCXX_EXPRS_H_CYCLIC
+static_assert(false, "Cyclic include detected of " __FILE__);
+#endif
+#define NAMEC_GENCXX_EXPRS_H_CYCLIC
 #ifndef NAMEC_GENCXX_EXPRS_H
 #define NAMEC_GENCXX_EXPRS_H
 
@@ -6,10 +10,12 @@
 
 namespace namecxx {
 
-class Expr : public Emit {
+class Expr : public TypeOrExpr {
 
 public:
   virtual ~Expr() = default;
+
+protected:
   virtual void emit_impl(std::ostream &SS) = 0;
 };
 
@@ -53,10 +59,13 @@ class CallExpr : public Expr {
   std::vector<Expr *> Args;
 
 public:
+  using arg_iterator = decltype(Args)::iterator;
   CallExpr(Expr *Callee, std::vector<Expr *> Args)
       : Callee(Callee), Args(Args) {}
   Expr *get_callee() { return Callee; }
-  std::vector<Expr *> get_args() { return Args; }
+  IteratorRange<arg_iterator> args() {
+    return IteratorRange<arg_iterator>(Args.begin(), Args.end());
+  }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -150,14 +159,22 @@ protected:
 class NewExpr : public Expr {
   Type *Ty;
   std::vector<Expr *> Args;
+  bool IsListInit;
+  Expr *ArraySize = nullptr;
+  Expr *Placement = nullptr;
 
 public:
   using iterator = decltype(Args)::iterator;
-  NewExpr(Type *Ty, std::vector<Expr *> Args) : Ty(Ty), Args(Args) {}
+  NewExpr(Type *Ty, std::vector<Expr *> Args, bool IsListInit)
+      : Ty(Ty), Args(Args), IsListInit(IsListInit) {}
   Type *get_type() { return Ty; }
   IteratorRange<iterator> args() {
     return IteratorRange<iterator>(Args.begin(), Args.end());
   }
+  void set_array_size(Expr *ArraySize) { this->ArraySize = ArraySize; }
+  Expr *get_array_size() { return ArraySize; }
+  void set_placement(Expr *Placement) { this->Placement = Placement; }
+  Expr *get_placement() { return Placement; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -165,10 +182,12 @@ protected:
 
 class DeleteExpr : public Expr {
   Expr *E;
+  bool IsArray;
 
 public:
-  DeleteExpr(Expr *E) : E(E) {}
+  DeleteExpr(Expr *E, bool IsArray) : E(E), IsArray(IsArray) {}
   Expr *get_expr() { return E; }
+  bool is_array() { return IsArray; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -187,13 +206,58 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+class QualNameExpr : public Expr {
+  QualName QN;
+
+public:
+  using iterator = QualName::iterator;
+  QualNameExpr(QualName QN) : QN(QN) {}
+  QualName get_name() { return QN; }
+  IteratorRange<iterator> names() { return QN.names(); }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class LambdaExpr : public Expr {
+  std::vector<Expr *> Captures;
+  std::vector<VarDecl *> Params;
+  bool IsVarArgs;
+  FuncScope *Body;
+  // In general exprs cannot have attributes, but lambdas can.
+  std::vector<Attribute *> Attrs;
+  Type *RetTy;
+
+public:
+  using capture_iterator = decltype(Captures)::iterator;
+  using param_iterator = decltype(Params)::iterator;
+  LambdaExpr(Context &C, std::vector<Expr *> Captures,
+             std::vector<VarDecl *> Params, bool IsVarArgs,
+             Type *RetTy = nullptr);
+  IteratorRange<capture_iterator> captures() {
+    return IteratorRange<capture_iterator>(Captures.begin(), Captures.end());
+  }
+  IteratorRange<param_iterator> params() {
+    return IteratorRange<param_iterator>(Params.begin(), Params.end());
+  }
+  size_t size() { return Params.size(); }
+  FuncScope *get_body() { return Body; }
+  IteratorRange<decltype(Attrs)::iterator> attrs() {
+    return IteratorRange<decltype(Attrs)::iterator>(Attrs.begin(), Attrs.end());
+  }
+  Type *get_ret_type() { return RetTy; }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
 class InstantiateExpr : public Expr {
   TemplateDecl *TD;
-  std::vector<Emit *> Args;
+  std::vector<TypeOrExpr *> Args;
 
 public:
   using iterator = decltype(Args)::iterator;
-  InstantiateExpr(TemplateDecl *TD, std::vector<Emit *> Args)
+  InstantiateExpr(TemplateDecl *TD, std::vector<TypeOrExpr *> Args)
       : TD(TD), Args(Args) {}
   TemplateDecl *get_template_decl() { return TD; }
   IteratorRange<iterator> args() {
@@ -204,48 +268,12 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class QualNameExpr : public Expr {
-  QualName *QN;
+class PackExpansionExpr : public Expr {
+  Expr *E;
 
 public:
-  using iterator = QualName::iterator;
-  QualNameExpr(std::vector<std::string> QN) : QN(QN) {}
-  IteratorRange<iterator> names() { return QN->names(); }
-
-protected:
-  void emit_impl(std::ostream &SS) override;
-};
-
-class LambdaExpr : public Expr {
-  bool CaptureDefaultByCopy;
-  std::vector<Expr *> Captures;
-  std::vector<VarDecl *> Params;
-  std::unique_ptr<Scope *> Body;
-  // In general exprs cannot have attributes, but lambdas can.
-  std::vector<Attribute *> Attrs;
-  Type *RetTy;
-
-public:
-  using capture_iterator = decltype(Captures)::iterator;
-  using param_iterator = decltype(Params)::iterator;
-  LambdaExpr(Context &C, bool CaptureDefaultByCopy,
-             std::vector<Expr *> Captures, std::vector<VarDecl *> Params,
-             Type *RetTy = nullptr)
-      : CaptureDefaultByCopy(CaptureDefaultByCopy), Captures(Captures),
-        Params(Params), Body(C.add_scope()), Attrs(Attrs), RetTy(RetTy) {}
-  bool capture_default_by_copy() { return CaptureDefaultByCopy; }
-  IteratorRange<capture_iterator> captures() {
-    return IteratorRange<capture_iterator>(Captures.begin(), Captures.end());
-  }
-  IteratorRange<param_iterator> params() {
-    return IteratorRange<param_iterator>(Params.begin(), Params.end());
-  }
-  size_t size() { return Params.size(); }
-  Scope *get_body() { return Body; }
-  IteratorRange<decltype(Attrs)::iterator> attrs() {
-    return IteratorRange<decltype(Attrs)::iterator>(Attrs.begin(), Attrs.end());
-  }
-  Type *get_ret_type() { return RetTy; }
+  PackExpansionExpr(Expr *E) : E(E) {}
+  Expr *get_expr() { return E; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -254,7 +282,7 @@ protected:
 class FoldExpr : public Expr {
   std::string Op;
   Expr *Pack;
-  // null means without initializer
+  // null means without initializer (unary op).
   Expr *Init;
   bool IsLeftFold;
 
@@ -270,6 +298,7 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+/* C++20
 class RequiresExpr : public Expr {
   std::vector<Expr *> Params;
   std::vector<Stmt *> Requirements;
@@ -291,7 +320,9 @@ public:
 protected:
   void emit_impl(std::ostream &SS) override;
 };
+*/
 
 } // namespace namecxx
 
 #endif // NAMEC_GENCXX_EXPRS_H
+#undef NAMEC_GENCXX_EXPRS_H_CYCLIC

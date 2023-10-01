@@ -9,6 +9,28 @@
 #include "internal/Gen/Stmts.h"
 
 namespace namec {
+// File TopLevel is split by if directives
+class TopLevel : public Emit,
+                 public DirectiveDefineMixin,
+                 public UbiquitousDeclStmtMixIn {
+  Context &C;
+  std::vector<Emit *> Entries;
+
+protected:
+  void on_add_directive(Directive *D) override { Entries.push_back(D); }
+  void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
+
+public:
+  TopLevel(Context &C)
+      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
+  // Only in top level we can define/declare functions
+  FuncDecl *def_func(std::string Name, Type *RetTy,
+                     std::vector<VarDecl *> Params, bool IsVarArg = false);
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
 // Scope is for normal scope, such as function body, if body, etc.
 class Scope : public Emit,
               public DirectiveDefineMixin,

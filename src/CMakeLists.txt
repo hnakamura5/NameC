@@ -18,6 +18,10 @@ target_sources(NameC_Gen PRIVATE
     GenCXX/CXXStmts.cpp
     GenCXX/CXXDecl.cpp
     GenCXX/CXXContext.cpp
+    GenCXX/CXXFile.cpp
+    GenCXX/CXXScope.cpp
+    GenCXX/CXXDirective.cpp
+    GenCXX/CXXMixins.cpp
 )
 
 target_link_libraries(NameC_Gen PRIVATE basic_configs)
