@@ -5,6 +5,7 @@
 #include "internal/GenCXX/CXXContext.h"
 #include "internal/GenCXX/CXXDecl.h"
 #include "internal/GenCXX/CXXExprs.h"
+#include "internal/GenCXX/CXXFile.h"
 #include "internal/GenCXX/CXXForwards.h"
 #include "internal/GenCXX/CXXScope.h"
 #include "internal/GenCXX/CXXStmts.h"

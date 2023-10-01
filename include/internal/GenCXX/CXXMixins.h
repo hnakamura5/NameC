@@ -153,5 +153,5 @@ public:
 
 } // namespace namecxx
 
-#endif // NAMEC_GEN_MIXINS_H
-#undef NAMEC_GEN_MIXINS_H_CYCLIC
+#endif // NAME_GENCXX_MIXINS_H
+#undef NAME_GENCXX_MIXINS_H_CYCLIC

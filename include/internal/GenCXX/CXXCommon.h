@@ -81,8 +81,8 @@ OS &join_out(OS &SS, IteratorRange<IterT> Range, std::string Sep = ",") {
       SS << Sep;
     }
     SS << *I;
-    return SS;
   }
+  return SS;
 }
 
 template <typename IterT>

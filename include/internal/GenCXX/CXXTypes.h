@@ -131,6 +131,7 @@ struct AccessSpec {
     case Private:
       return "private";
     }
+    return "";
   }
 };
 
