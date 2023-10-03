@@ -22,6 +22,7 @@ target_sources(NameC_Gen PRIVATE
     GenCXX/CXXScope.cpp
     GenCXX/CXXDirective.cpp
     GenCXX/CXXMixins.cpp
+    GenCXX/CXXCommon.cpp
 )
 
 target_link_libraries(NameC_Gen PRIVATE basic_configs)

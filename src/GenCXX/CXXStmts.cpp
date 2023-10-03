@@ -148,3 +148,8 @@ void TryStmt::emit_impl(std::ostream &SS) {
     SS << "){" << Handler << "}";
   }
 }
+
+void UsingNamespaceStmt::emit_impl(std::ostream &SS) {
+  SS << "\n";
+  SS << "using namespace " << get_name_str() << ";";
+}

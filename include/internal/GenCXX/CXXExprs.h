@@ -194,11 +194,11 @@ protected:
 };
 
 class UserDefinedLiteral : public Expr {
-  std::string Postfix;
   Expr *E;
+  std::string Postfix;
 
 public:
-  UserDefinedLiteral(std::string Postfix, Expr *E) : Postfix(Postfix), E(E) {}
+  UserDefinedLiteral(Expr *E, std::string Postfix) : E(E), Postfix(Postfix) {}
   std::string get_postfix() { return Postfix; }
   Expr *get_expr() { return E; }
 

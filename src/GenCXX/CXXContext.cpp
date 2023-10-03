@@ -15,16 +15,6 @@ Context::qual_name_concat(QualName Top, std::vector<std::string> Other) {
 }
 
 std::vector<std::string>
-Context::qual_name_concat(std::string Top, std::vector<std::string> Other) {
-  std::vector<std::string> Names;
-  Names.push_back(Top);
-  for (auto Name : Other) {
-    Names.push_back(Name);
-  }
-  return Names;
-}
-
-std::vector<std::string>
 Context::qual_name_concat(Decl *Top, std::vector<std::string> Other) {
   std::vector<std::string> Names;
   return qual_name_concat(Top->get_name_str(), Other);

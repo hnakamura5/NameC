@@ -2,6 +2,8 @@
 
 using namespace namecxx;
 
+void RawExpr::emit_impl(std::ostream &SS) { SS << get_val(); }
+
 void VariableExpr::emit_impl(std::ostream &SS) {
   SS << get_decl()->get_name_str();
 }
@@ -50,9 +52,9 @@ void NewExpr::emit_impl(std::ostream &SS) {
     SS << "[" << get_array_size() << "]";
   }
   if (IsListInit) {
-    SS << "(" << join(args()) << ")";
-  } else {
     SS << "{" << join(args()) << "}";
+  } else {
+    SS << "(" << join(args()) << ")";
   }
 }
 
@@ -78,7 +80,7 @@ LambdaExpr::LambdaExpr(Context &C, std::vector<Expr *> Captures,
 
 void LambdaExpr::emit_impl(std::ostream &SS) {
   SS << "[" << join(captures()) << "]";
-  SS << "(" << join(params()) << ")";
+  SS << "(" << join(params());
   if (IsVarArgs) {
     SS << ",...";
   }
@@ -100,19 +102,15 @@ void PackExpansionExpr::emit_impl(std::ostream &SS) {
 void FoldExpr::emit_impl(std::ostream &SS) {
   if (get_init()) {
     if (IsLeftFold) {
-      SS << "(" << get_init() << " " << Op << " ... " << Op << " " << get_pack()
-         << ")";
+      SS << "(" << get_init() << Op << " ... " << Op << get_pack() << ")";
     } else {
-      SS << "(" << get_pack() << " " << Op << " ... " << Op << " " << get_init()
-         << ")";
+      SS << "(" << get_pack() << Op << " ... " << Op << get_init() << ")";
     }
   } else {
     if (IsLeftFold) {
-      SS << "("
-         << " ... " << Op << " " << get_pack() << ")";
+      SS << "( ... " << Op << get_pack() << ")";
     } else {
-      SS << "(" << get_pack() << Op << " ... "
-         << ")";
+      SS << "(" << get_pack() << Op << " ... )";
     }
   }
 }

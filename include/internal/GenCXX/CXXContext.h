@@ -163,8 +163,6 @@ private:
   // QualName handling implementations.
   std::vector<std::string> qual_name_concat(QualName Top,
                                             std::vector<std::string> Other);
-  std::vector<std::string> qual_name_concat(std::string Top,
-                                            std::vector<std::string> Other);
   std::vector<std::string> qual_name_concat(Decl *Top,
                                             std::vector<std::string> Other);
   template <typename T> std::vector<std::string> qn_impl(T Name) {
@@ -265,6 +263,12 @@ public:
   DeleteExpr *expr_delete(Expr *Val, bool IsArray = false) {
     return add_expr(new DeleteExpr(Val, IsArray));
   }
+  UserDefinedLiteral *expr_user_defined_literal(Expr *E, std::string Postfix) {
+    return add_expr(new UserDefinedLiteral(E, Postfix));
+  }
+  QualNameExpr *expr_qual_name(QualName Name) {
+    return add_expr(new QualNameExpr(Name));
+  }
   InstantiateExpr *expr_instantiate(TemplateDecl *TD,
                                     std::vector<TypeOrExpr *> Args) {
     return add_expr(new InstantiateExpr(TD, Args));
@@ -278,6 +282,28 @@ public:
   }
   FoldExpr *expr_fold(std::string Op, Expr *Pack, Expr *Init, bool IsLeftFold) {
     return add_expr(new FoldExpr(Op, Pack, Init, IsLeftFold));
+  }
+
+  // handy expr APIs
+  UnaryOp *expr_addr(Expr *E) { return expr_pre_unary("&", E); }
+  UnaryOp *expr_deref(Expr *E) { return expr_pre_unary("*", E); }
+  UnaryOp *expr_not(Expr *E) { return expr_pre_unary("!", E); }
+  BinaryOp *expr_dot(Expr *LHS, QualName RHS) {
+    return expr_binary(".", LHS, expr_qual_name(RHS));
+  }
+  BinaryOp *expr_arrow(Expr *LHS, QualName RHS) {
+    return expr_binary("->", LHS, expr_qual_name(RHS));
+  }
+  BinaryOp *expr_eq(Expr *LHS, Expr *RHS) {
+    return expr_binary("==", LHS, RHS);
+  }
+  BinaryOp *expr_lt(Expr *LHS, Expr *RHS) { return expr_binary("<", LHS, RHS); }
+  BinaryOp *expr_gt(Expr *LHS, Expr *RHS) { return expr_binary(">", LHS, RHS); }
+  BinaryOp *expr_leq(Expr *LHS, Expr *RHS) {
+    return expr_binary("<=", LHS, RHS);
+  }
+  BinaryOp *expr_geq(Expr *LHS, Expr *RHS) {
+    return expr_binary(">=", LHS, RHS);
   }
 
   // Type factory APIs

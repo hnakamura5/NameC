@@ -138,6 +138,9 @@ void FuncDecl::emit_impl(std::ostream &SS) {
     SS << "{";
     SS << Body;
     SS << "}";
+  } else {
+    // Forward declaration
+    SS << ";";
   }
 }
 

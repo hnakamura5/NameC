@@ -66,7 +66,7 @@ public:
   IteratorRange<iterator> names() {
     return IteratorRange<iterator>(Names.begin(), Names.end());
   }
-  std::string to_string() const;
+  std::string to_string();
 };
 
 template <typename OS> OS &operator<<(OS &SS, Emit *E) {

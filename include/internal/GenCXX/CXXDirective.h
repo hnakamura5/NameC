@@ -113,7 +113,7 @@ class IfDirectiveBase : public Directive {
 protected:
   TopLevel *Then;
   std::vector<std::pair<Expr *, TopLevel *>> Elifs;
-  TopLevel *Else;
+  TopLevel *Else = nullptr;
 
   // TODO: elif
 
@@ -174,19 +174,6 @@ public:
   QualName get_name() { return Name; }
   std::string get_name_str() { return Name.to_string(); }
   TopLevel *get_body() { return Body; }
-
-protected:
-  void emit_impl(std::ostream &SS) override;
-};
-
-// using namespace QualName;
-class UsingNamespace : public Directive {
-  QualName Name;
-
-public:
-  UsingNamespace(QualName Name) : Name(Name) {}
-  QualName get_name() { return Name; }
-  std::string get_name_str() { return Name.to_string(); }
 
 protected:
   void emit_impl(std::ostream &SS) override;

@@ -16,3 +16,10 @@ define_gen_test(Gen StmtTest)
 define_gen_test(Gen TypeTest)
 define_gen_test(Gen DirectiveTest)
 define_gen_test(Gen FileTest)
+
+define_gen_test(GenCXX ExprTest)
+define_gen_test(GenCXX StmtTest)
+define_gen_test(GenCXX TypeTest)
+define_gen_test(GenCXX DirectiveTest)
+define_gen_test(GenCXX FileTest)
+

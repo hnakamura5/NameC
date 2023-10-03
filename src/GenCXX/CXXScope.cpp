@@ -49,3 +49,9 @@ TopLevel *ClassTopLevel::def_namespace(QualName Name) {
   Entries.push_back(NS);
   return NS->get_body();
 }
+
+void ClassTopLevel::emit_impl(std::ostream &SS) {
+  for (auto *E : Entries) {
+    SS << E << "\n";
+  }
+}

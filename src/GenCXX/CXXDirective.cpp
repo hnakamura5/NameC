@@ -110,11 +110,6 @@ void Namespace::emit_impl(std::ostream &SS) {
   SS << "}";
 }
 
-void UsingNamespace::emit_impl(std::ostream &SS) {
-  SS << "\n";
-  SS << "using namespace " << get_name_str() << ";";
-}
-
 void UsingDirective::emit_impl(std::ostream &SS) {
   SS << "\n";
   SS << "using " << get_name_str() << ";";

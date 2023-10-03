@@ -278,6 +278,19 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+// using namespace QualName;
+class UsingNamespaceStmt : public Stmt {
+  QualName Name;
+
+public:
+  UsingNamespaceStmt(Context &C, QualName Name) : Stmt(C), Name(Name) {}
+  QualName get_name() { return Name; }
+  std::string get_name_str() { return Name.to_string(); }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
 } // namespace namecxx
 
 #endif // NAMEC_GENCXX_STMTS_H
