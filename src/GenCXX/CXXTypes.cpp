@@ -22,13 +22,13 @@ void Function::emit_impl(std::ostream &SS) {
   SS << get_ret_type() << "(" << join(params()) << ")";
 }
 
-ClassTopLevel *MembersType::add_visibility_scope(AccessSpec AS) {
-  auto *T = C.add_class_top_level();
+ClassTopLevel *ClassOrUnion::add_visibility_scope(AccessSpec AS) {
+  auto *T = C.add_class_top_level(this);
   VisibilityScopes.push_back({AS, T});
   return T;
 }
 
-void MembersType::emit_impl(std::ostream &SS) {
+void ClassOrUnion::emit_impl(std::ostream &SS) {
   SS << "{";
   for (auto &[Visibility, Scope] : visibility_scopes()) {
     SS << Visibility.get_name() << ":\n";
@@ -57,12 +57,12 @@ void Class::emit_impl(std::ostream &SS) {
       }
     }
   }
-  MembersType::emit_impl(SS);
+  ClassOrUnion::emit_impl(SS);
 }
 
 void Union::emit_impl(std::ostream &SS) {
   SS << "union " << get_name_str();
-  MembersType::emit_impl(SS);
+  ClassOrUnion::emit_impl(SS);
 }
 
 void Enum::emit_impl(std::ostream &SS) {

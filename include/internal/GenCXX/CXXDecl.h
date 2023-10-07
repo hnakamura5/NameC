@@ -71,11 +71,15 @@ class ArrayVarDecl : public VarDecl {
   std::vector<Expr *> Size;
 
 public:
+  using size_iterator = decltype(Size)::iterator;
   ArrayVarDecl(QualName Name, Type *Ty, std::vector<Expr *> Size)
       : VarDecl(Name, Ty), Size(Size) {}
   ArrayVarDecl(QualName Name, Type *Ty, std::vector<Expr *> Size, Expr *Init)
       : VarDecl(Name, Ty, Init), Size(Size) {}
   std::vector<Expr *> get_size() { return Size; }
+  IteratorRange<size_iterator> sizes() {
+    return IteratorRange<size_iterator>(Size.begin(), Size.end());
+  }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -141,10 +145,14 @@ protected:
   bool IsInline = false;
 
 public:
+  using param_iterator = decltype(Params)::iterator;
   FuncDecl(Context &C, QualName Name, Type *RetTy,
            std::vector<VarDecl *> Params, bool IsVarArg)
       : C(C), RetTy(RetTy), Name(Name), Params(Params), IsVarArg(IsVarArg) {}
   Type *get_ret_type() { return RetTy; }
+  IteratorRange<param_iterator> params() {
+    return IteratorRange<param_iterator>(Params.begin(), Params.end());
+  }
   std::vector<VarDecl *> get_params() { return Params; }
   FuncScope *get_or_add_body();
   void set_extern(bool IsExtern) { this->IsExtern = IsExtern; }
@@ -193,7 +201,7 @@ protected:
 
 class MethodDecl : public FuncDecl {
 protected:
-  Class *Parent;
+  ClassOrUnion *Parent;
   bool IsOverride = false;
   bool IsVirtual = false;
   bool IsDelete = false;
@@ -202,7 +210,7 @@ protected:
   bool IsConst = false;
 
 public:
-  MethodDecl(Context &C, Class *Parent, QualName Name, Type *RetTy,
+  MethodDecl(Context &C, ClassOrUnion *Parent, QualName Name, Type *RetTy,
              std::vector<VarDecl *> Params, bool IsVarArg)
       : FuncDecl(C, Name, RetTy, Params, IsVarArg), Parent(Parent) {}
   void set_override(bool IsOverride) { this->IsOverride = IsOverride; }
@@ -218,6 +226,22 @@ public:
   bool is_const() { return IsConst; }
   bool is_forward() override {
     return !Body && !IsAbstract && !IsDefault && !IsDelete;
+  }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class CtorDecl : public MethodDecl {
+  std::vector<std::pair<QualName, Expr *>> Inits;
+
+public:
+  using init_iterator = decltype(Inits)::iterator;
+  CtorDecl(Context &C, ClassOrUnion *Parent, std::vector<VarDecl *> Params,
+           bool IsVarArg);
+  void add_init(QualName Name, Expr *Init) { Inits.push_back({Name, Init}); }
+  IteratorRange<init_iterator> inits() {
+    return IteratorRange<init_iterator>(Inits.begin(), Inits.end());
   }
 
 protected:

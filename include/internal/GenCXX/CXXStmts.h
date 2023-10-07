@@ -268,7 +268,7 @@ public:
   TryStmt(Context &C) : Stmt(C), Body(C.add_func_scope()) {}
   FuncScope *get_body() { return Body; }
   // nullptr  for catch(...)
-  FuncScope *add_handler(VarDecl *D = nullptr) {
+  FuncScope *add_catch(VarDecl *D = nullptr) {
     auto S = C.add_func_scope();
     Handlers.push_back({D, S});
     return S;

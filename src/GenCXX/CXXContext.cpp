@@ -38,8 +38,8 @@ MacroFuncScope *Context::add_macro_func_scope() {
   return Ret;
 }
 
-ClassTopLevel *Context::add_class_top_level() {
-  auto *Ret = new ClassTopLevel(*this);
+ClassTopLevel *Context::add_class_top_level(ClassOrUnion *Cls) {
+  auto *Ret = new ClassTopLevel(*this, Cls);
   ClassTopLevels.push_back(std::unique_ptr<ClassTopLevel>(Ret));
   return Ret;
 }

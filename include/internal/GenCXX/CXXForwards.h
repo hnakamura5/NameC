@@ -1,6 +1,7 @@
 #ifndef NAMEC_GENCXX_FORWARDS_H
 #define NAMEC_GENCXX_FORWARDS_H
 
+#include <functional>
 #include <iosfwd>
 #include <map>
 #include <memory>
@@ -21,8 +22,8 @@ class MacroFuncScope;
 class Expr;
 class Stmt;
 class Type;
+class ClassOrUnion;
 class Class;
-class Struct;
 class Union;
 class Enum;
 class Decl;

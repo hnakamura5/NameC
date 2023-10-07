@@ -139,7 +139,7 @@ void ThrowStmt::emit_impl(std::ostream &SS) {
 void TryStmt::emit_impl(std::ostream &SS) {
   SS << "try{" << get_body() << "}";
   for (auto &[CatchVar, Handler] : Handlers) {
-    SS << "(";
+    SS << "catch(";
     if (CatchVar) {
       SS << CatchVar;
     } else {
@@ -150,6 +150,5 @@ void TryStmt::emit_impl(std::ostream &SS) {
 }
 
 void UsingNamespaceStmt::emit_impl(std::ostream &SS) {
-  SS << "\n";
   SS << "using namespace " << get_name_str() << ";";
 }

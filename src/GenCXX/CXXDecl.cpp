@@ -41,17 +41,10 @@ void VarDecl::emit_impl(std::ostream &SS) {
 
 void ArrayVarDecl::emit_impl(std::ostream &SS) {
   emit_type_qual(SS, this);
-  SS << get_type();
-  SS << " ";
-  SS << get_name_str();
-  SS << "[";
-  for (auto S : get_size()) {
-    SS << S;
-    SS << "][";
-  }
-  SS << "]";
+  SS << get_type() << " " << get_name_str();
+  SS << "[" << join(sizes(), "][") << "]";
   if (get_init()) {
-    SS << " = ";
+    SS << "=";
     SS << get_init();
   }
 }
@@ -166,14 +159,59 @@ void UnionDecl::emit_impl(std::ostream &SS) {
   }
 }
 
+static void emit_method_qual(std::ostream &SS, MethodDecl *D) {
+  if (D->is_override()) {
+    SS << "override ";
+  }
+  if (D->is_const()) {
+    SS << "const ";
+  }
+  if (D->is_abstract()) {
+    SS << "=0;";
+    return;
+  }
+  if (D->is_default()) {
+    SS << "=default;";
+    return;
+  }
+  if (D->is_delete()) {
+    SS << "=delete;";
+    return;
+  }
+}
+
 void MethodDecl::emit_impl(std::ostream &SS) {
   emit_func_qual(SS, this);
   if (is_virtual()) {
     SS << "virtual ";
   }
-  SS << get_ret_type();
+  if (get_ret_type()) {
+    // Allowing null return type for ctor/dtor
+    SS << get_ret_type();
+  }
   SS << " ";
   SS << get_name_str();
+  SS << "(" << join(params()) << ")";
+  if (is_vararg()) {
+    SS << ",...";
+  }
+  SS << ")";
+  emit_method_qual(SS, this);
+  if (Body) {
+    SS << "{" << Body << "}";
+  } else {
+    // Forward declaration
+    SS << ";";
+  }
+}
+
+CtorDecl::CtorDecl(Context &C, ClassOrUnion *Parent,
+                   std::vector<VarDecl *> Params, bool IsVarArg)
+    : MethodDecl(C, Parent, Name, nullptr, Params, IsVarArg) {}
+
+void CtorDecl::emit_impl(std::ostream &SS) {
+  emit_func_qual(SS, this);
+  SS << Parent->get_name().last();
   SS << "(";
   for (auto I = 0; I < Params.size(); ++I) {
     SS << Params[I];
@@ -185,28 +223,14 @@ void MethodDecl::emit_impl(std::ostream &SS) {
     SS << ",...";
   }
   SS << ")";
-  if (is_override()) {
-    SS << "override ";
-  }
-  if (is_const()) {
-    SS << "const ";
-  }
-  if (is_abstract()) {
-    SS << "=0;";
-    return;
-  }
-  if (is_default()) {
-    SS << "=default;";
-    return;
-  }
-  if (is_delete()) {
-    SS << "=delete;";
-    return;
+  emit_method_qual(SS, this);
+  if (Inits.size() > 0) {
+    SS << ":" << join_map(inits(), ",", [](auto &P) {
+      return P->first.to_string() + "(" + P->second->to_string() + ")";
+    });
   }
   if (Body) {
-    SS << "{";
-    SS << Body;
-    SS << "}";
+    SS << "{" << Body << "}";
   } else {
     // Forward declaration
     SS << ";";
@@ -230,6 +254,6 @@ void TemplateDecl::emit_impl(std::ostream &SS) {
       SS << ",";
     }
   }
-  SS << ">";
+  SS << "> ";
   SS << D;
 }

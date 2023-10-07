@@ -135,7 +135,7 @@ struct AccessSpec {
   }
 };
 
-class MembersType : public Type {
+class ClassOrUnion : public Type {
   Context &C;
   QualName Name;
   // This have each segment with visibility as top-levels.
@@ -146,7 +146,7 @@ class MembersType : public Type {
 
 public:
   using iterator = decltype(VisibilityScopes)::iterator;
-  MembersType(Context &C, QualName Name) : C(C), Name(Name) {}
+  ClassOrUnion(Context &C, QualName Name) : C(C), Name(Name) {}
   QualName get_name() { return Name; }
   std::string get_name_str() { return Name.to_string(); }
   ClassTopLevel *add_public_scope() {
@@ -167,7 +167,7 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class Class : public MembersType {
+class Class : public ClassOrUnion {
   bool IsStruct; // Whether to use struct keyword.
   std::vector<std::pair<AccessSpec, Type *>> Bases;
   bool IsFinal = false;
@@ -175,7 +175,7 @@ class Class : public MembersType {
 public:
   using base_iterator = decltype(Bases)::iterator;
   Class(Context &C, QualName Name, decltype(Bases) Bases, bool IsStruct)
-      : MembersType(C, Name), Bases(Bases), IsStruct(IsStruct) {}
+      : ClassOrUnion(C, Name), Bases(Bases), IsStruct(IsStruct) {}
   bool is_struct() { return IsStruct; }
   size_t base_size() { return Bases.size(); }
   IteratorRange<base_iterator> bases() {
@@ -189,9 +189,9 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
-class Union : public MembersType {
+class Union : public ClassOrUnion {
 public:
-  Union(Context &C, QualName Name) : MembersType(C, Name) {}
+  Union(Context &C, QualName Name) : ClassOrUnion(C, Name) {}
 
 protected:
   void emit_impl(std::ostream &SS) override;

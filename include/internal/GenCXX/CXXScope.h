@@ -29,7 +29,13 @@ public:
   // Only in top level we can define/declare functions
   FuncDecl *def_func(QualName Name, Type *RetTy, std::vector<VarDecl *> Params,
                      bool IsVarArg = false);
+  FuncTemplateDecl *def_func_template(QualName Name,
+                                      std::vector<VarDecl *> TemplateParams,
+                                      Type *RetTy,
+                                      std::vector<VarDecl *> Params,
+                                      bool IsVarArg = false);
   TopLevel *def_namespace(QualName Name);
+  UsingNamespaceStmt *stmt_using_namespace(QualName Name);
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -52,6 +58,7 @@ public:
   FuncScope(Context &C)
       : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C),
         InFunctionStmtMixIn(C) {}
+  UsingNamespaceStmt *stmt_using_namespace(QualName Name);
   virtual ~FuncScope() {}
 
 protected:
@@ -81,33 +88,40 @@ class ClassTopLevel : public Emit,
                       public DirectiveDefineMixin,
                       public UbiquitousDeclStmtMixIn {
   Context &C;
+  ClassOrUnion *Cls;
 
   std::vector<Emit *> Entries;
   std::vector<std::unique_ptr<Namespace>> Namespaces;
+  std::vector<std::unique_ptr<Stmt>> Stmts;
+
+  template <typename T> DeclStmt *add_stmt_decl(T *D) {
+    auto *S = new DeclStmt(C, D);
+    Stmts.push_back(std::unique_ptr<Stmt>(S));
+    return S;
+  }
 
 protected:
   virtual void on_add_directive(Directive *D) override { Entries.push_back(D); }
   virtual void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
 
 public:
-  ClassTopLevel(Context &C)
-      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
+  ClassTopLevel(Context &C, ClassOrUnion *Cls)
+      : C(C), Cls(Cls), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
   virtual ~ClassTopLevel() {}
 
   TopLevel *def_namespace(QualName Name);
   VarDecl *def_field(QualName Name, Type *T, Expr *Init = nullptr);
   VarTemplateDecl *def_field_template(QualName Name,
                                       std::vector<VarDecl *> TemplateParams,
-                                      Type *T, std::vector<Expr *> Args,
-                                      Expr *Init = nullptr);
-  MethodDecl *def_method(QualName Name, std::vector<VarDecl *> Params,
-                         Type *RetTy, bool IsVarArgs = false);
+                                      Type *T, Expr *Init = nullptr);
+  MethodDecl *def_method(QualName Name, Type *RetTy,
+                         std::vector<VarDecl *> Params, bool IsVarArgs = false);
   MethodTemplateDecl *def_method_template(QualName Name,
                                           std::vector<VarDecl *> TemplateParams,
                                           Type *RetTy,
                                           std::vector<VarDecl *> Params,
                                           bool IsVarArgs = false);
-  MethodDecl *def_ctor(std::vector<VarDecl *> Params, bool IsVarArgs = false);
+  CtorDecl *def_ctor(std::vector<VarDecl *> Params, bool IsVarArgs = false);
   MethodDecl *def_dtor();
 
 protected:

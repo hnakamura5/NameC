@@ -21,6 +21,7 @@ class Context {
   friend class FuncScope;
   friend class TopLevel;
   friend class UbiquitousDeclStmtMixIn;
+  friend class ClassTopLevel;
 
   std::vector<std::unique_ptr<FuncScope>> FuncScopes;
   std::vector<std::unique_ptr<MacroFuncScope>> MacroFuncScopes;
@@ -68,7 +69,7 @@ public:
   FuncScope *add_func_scope();
   TopLevel *add_top_level();
   MacroFuncScope *add_macro_func_scope();
-  ClassTopLevel *add_class_top_level();
+  ClassTopLevel *add_class_top_level(ClassOrUnion *Cls);
 
 private:
   // Decl factory APIs. Not public to user. Intended to be used by internal
@@ -81,6 +82,14 @@ private:
   FuncDecl *decl_func(QualName Name, Type *RetTy, std::vector<VarDecl *> Params,
                       bool IsVarArgs = false) {
     return add_decl(new FuncDecl(*this, Name, RetTy, Params, IsVarArgs));
+  }
+  FuncTemplateDecl *decl_func_template(QualName Name,
+                                       std::vector<VarDecl *> TemplateParams,
+                                       Type *RetTy,
+                                       std::vector<VarDecl *> Params,
+                                       bool IsVarArgs = false) {
+    return add_decl(new FuncTemplateDecl(
+        *this, decl_func(Name, RetTy, Params, IsVarArgs), TemplateParams));
   }
   EnumDecl *decl_enum(Enum *E, bool IsForward = false) {
     return add_decl(new EnumDecl(E, IsForward));
@@ -95,12 +104,7 @@ private:
     return add_decl(
         new RawTemplateDecl(*this, decl_raw(Name.to_string()), TemplateParams));
   }
-  VarTemplateDecl *decl_var_template(QualName Name,
-                                     std::vector<VarDecl *> TemplateParams,
-                                     Type *T, Expr *Init = nullptr) {
-    return add_decl(
-        new VarTemplateDecl(*this, decl_var(Name, T, Init), TemplateParams));
-  }
+
   ArrayVarTemplateDecl *
   decl_array_var_template(QualName Name, std::vector<VarDecl *> TemplateParams,
                           Type *T, std::vector<Expr *> Size,
@@ -136,13 +140,17 @@ private:
     return add_decl(
         new UnionTemplateDecl(*this, decl_union(T, false), TemplateParams));
   }
-  MethodDecl *decl_method(QualName Name, Class *C, Type *RetTy,
+  MethodDecl *decl_method(QualName Name, ClassOrUnion *C, Type *RetTy,
                           std::vector<VarDecl *> Params,
                           bool IsVarArgs = false) {
     return add_decl(new MethodDecl(*this, C, Name, RetTy, Params, IsVarArgs));
   }
+  CtorDecl *decl_ctor(ClassOrUnion *C, std::vector<VarDecl *> Params,
+                      bool IsVarArgs = false) {
+    return add_decl(new CtorDecl(*this, C, Params, IsVarArgs));
+  }
   MethodTemplateDecl *
-  decl_method_template(QualName Name, Class *C,
+  decl_method_template(QualName Name, ClassOrUnion *C,
                        std::vector<VarDecl *> TemplateParams, Type *RetTy,
                        std::vector<VarDecl *> Params, bool IsVarArgs = false) {
     return add_decl(new MethodTemplateDecl(
@@ -178,6 +186,13 @@ public:
   VarDecl *decl_var(QualName Name, Type *T, Expr *Init = nullptr) {
     return add_decl(new VarDecl(Name, T, Init));
   }
+  VarTemplateDecl *decl_var_template(QualName Name,
+                                     std::vector<VarDecl *> TemplateParams,
+                                     Type *T, Expr *Init = nullptr) {
+    return add_decl(
+        new VarTemplateDecl(*this, decl_var(Name, T, Init), TemplateParams));
+  }
+
   QualName qual_name(std::vector<std::string> Name) { return QualName(Name); }
   // Super shortcut API for qual_name used as construction and concatenation.
   // Accept string, QualName and Decl.
@@ -309,6 +324,7 @@ public:
   // Type factory APIs
 public:
   RawType *type_raw(std::string Val) { return add_type(new RawType(Val)); }
+  Named *type_var(VarDecl *D) { return type_name(D); }
   RawType *type_auto() { return get_or_add_raw_type("auto"); }
   RawType *type_char() { return get_or_add_raw_type("char"); }
   RawType *type_uchar() { return get_or_add_raw_type("unsigned char"); }
@@ -367,7 +383,7 @@ public:
 
   // C++ specific.
   Class *type_class(QualName Name,
-                    std::vector<std::pair<AccessSpec, Type *>> Bases,
+                    std::vector<std::pair<AccessSpec, Type *>> Bases = {},
                     bool IsStruct = false) {
     return add_type(new Class(*this, Name, Bases, IsStruct));
   }
