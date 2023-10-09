@@ -35,6 +35,9 @@ class Directive;
 class TypeAlias;
 class Attribute;
 class QualNameExpr;
+class UbiquitousDeclStmtMixin;
+class ClassTopLevel;
+class ClassMemberDeclMixin;
 } // namespace namecxx
 
 #endif

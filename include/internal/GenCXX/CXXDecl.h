@@ -128,7 +128,10 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+class FuncSplitForwardDecl;
 class FuncDecl : public Decl {
+  friend class FuncSplitForwardDecl;
+
 protected:
   Context &C;
   Type *RetTy;
@@ -166,6 +169,33 @@ public:
   bool is_inline() { return IsInline; }
   bool is_vararg() { return IsVarArg; }
   QualName get_name() override { return Name; }
+  virtual bool is_split_definition() { return false; }
+
+protected:
+  virtual void emit_impl_impl(std::ostream &SS, bool IsForward,
+                              bool IsSplitDefinition);
+  void emit_impl(std::ostream &SS) override;
+};
+
+class FuncSplitDecl : public FuncDecl {
+
+public:
+  using FuncDecl::FuncDecl;
+  bool is_split_definition() override { return true; }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class FuncSplitForwardDecl : public Decl {
+
+protected:
+  FuncSplitDecl *FD;
+
+public:
+  FuncSplitForwardDecl(FuncSplitDecl *FD) : FD(FD) {}
+  FuncDecl *get_func_decl() { return FD; }
+  QualName get_name() override { return FD->get_name(); }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -199,20 +229,23 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+class MethodSplitForwardDecl;
 class MethodDecl : public FuncDecl {
+  friend class MethodSplitForwardDecl;
+
 protected:
-  ClassOrUnion *Parent;
   bool IsOverride = false;
   bool IsVirtual = false;
   bool IsDelete = false;
   bool IsDefault = false;
   bool IsAbstract = false;
   bool IsConst = false;
+  bool IsFinal = false;
 
 public:
-  MethodDecl(Context &C, ClassOrUnion *Parent, QualName Name, Type *RetTy,
+  MethodDecl(Context &C, QualName Name, Type *RetTy,
              std::vector<VarDecl *> Params, bool IsVarArg)
-      : FuncDecl(C, Name, RetTy, Params, IsVarArg), Parent(Parent) {}
+      : FuncDecl(C, Name, RetTy, Params, IsVarArg) {}
   void set_override(bool IsOverride) { this->IsOverride = IsOverride; }
   bool is_override() { return IsOverride; }
   void set_virtual(bool IsVirtual) { this->IsVirtual = IsVirtual; }
@@ -223,26 +256,84 @@ public:
   bool is_default() { return IsDefault; }
   void set_abstract(bool IsAbstract) { this->IsAbstract = IsAbstract; }
   bool is_abstract() { return IsAbstract; }
+  void set_const(bool IsConst) { this->IsConst = IsConst; }
   bool is_const() { return IsConst; }
+  void set_final(bool IsFinal) { this->IsFinal = IsFinal; }
+  bool is_final() { return IsFinal; }
   bool is_forward() override {
     return !Body && !IsAbstract && !IsDefault && !IsDelete;
   }
 
 protected:
+  void emit_impl_impl(std::ostream &SS, bool IsForward,
+                      bool IsSplitDefinition) override;
   void emit_impl(std::ostream &SS) override;
 };
 
+class MethodSplitDecl : public MethodDecl {
+  ClassOrUnion *Parent;
+
+public:
+  MethodSplitDecl(Context &C, ClassOrUnion *Parent, QualName Name, Type *RetTy,
+                  std::vector<VarDecl *> Params, bool IsVarArg);
+  ClassOrUnion *get_parent() { return Parent; }
+
+protected:
+  bool is_split_definition() override { return true; }
+  void emit_impl(std::ostream &SS) override;
+};
+
+class MethodSplitForwardDecl : public Decl {
+  MethodSplitDecl *MD;
+
+public:
+  MethodSplitForwardDecl(MethodSplitDecl *MD) : MD(MD) {}
+  MethodDecl *get_method_decl() { return MD; }
+  QualName get_name() override { return MD->get_name(); }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class CtorSplitForwardDecl;
 class CtorDecl : public MethodDecl {
+  friend class CtorSplitForwardDecl;
   std::vector<std::pair<QualName, Expr *>> Inits;
 
 public:
   using init_iterator = decltype(Inits)::iterator;
-  CtorDecl(Context &C, ClassOrUnion *Parent, std::vector<VarDecl *> Params,
+  CtorDecl(Context &C, QualName Name, std::vector<VarDecl *> Params,
            bool IsVarArg);
   void add_init(QualName Name, Expr *Init) { Inits.push_back({Name, Init}); }
   IteratorRange<init_iterator> inits() {
     return IteratorRange<init_iterator>(Inits.begin(), Inits.end());
   }
+
+protected:
+  void emit_impl_impl(std::ostream &SS, bool IsForward,
+                      bool IsSplitDefinition) override;
+  void emit_impl(std::ostream &SS) override;
+};
+
+class CtorSplitDecl : public CtorDecl {
+  ClassOrUnion *Parent;
+
+public:
+  CtorSplitDecl(Context &C, ClassOrUnion *Parent, std::vector<VarDecl *> Params,
+                bool IsVarArg);
+  ClassOrUnion *get_parent() { return Parent; }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class CtorSplitForwardDecl : public Decl {
+  CtorSplitDecl *CD;
+
+public:
+  CtorSplitForwardDecl(CtorSplitDecl *CD) : CD(CD) {}
+  CtorDecl *get_ctor_decl() { return CD; }
+  QualName get_name() override { return CD->get_name(); }
 
 protected:
   void emit_impl(std::ostream &SS) override;

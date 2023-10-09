@@ -11,7 +11,7 @@ static_assert(false, "Cyclic include detected of " __FILE__);
 #include "internal/GenCXX/CXXTypes.h"
 
 namespace namecxx {
-class UbiquitousDeclStmtMixIn;
+class UbiquitousDeclStmtMixin;
 
 // Context manage Scope, Decl and Expr heap existence. Stmt are kept in Scope.
 // This also exists to eliminate complex circular dependency between Scope,
@@ -20,8 +20,9 @@ class Context {
   friend class CFile;
   friend class FuncScope;
   friend class TopLevel;
-  friend class UbiquitousDeclStmtMixIn;
+  friend class UbiquitousDeclStmtMixin;
   friend class ClassTopLevel;
+  friend class ClassMemberDeclMixin;
 
   std::vector<std::unique_ptr<FuncScope>> FuncScopes;
   std::vector<std::unique_ptr<MacroFuncScope>> MacroFuncScopes;
@@ -83,6 +84,14 @@ private:
                       bool IsVarArgs = false) {
     return add_decl(new FuncDecl(*this, Name, RetTy, Params, IsVarArgs));
   }
+  FuncSplitDecl *decl_func_split(QualName Name, Type *RetTy,
+                                 std::vector<VarDecl *> Params,
+                                 bool IsVarArgs = false) {
+    return add_decl(new FuncSplitDecl(*this, Name, RetTy, Params, IsVarArgs));
+  }
+  FuncSplitForwardDecl *decl_func_split_forward(FuncSplitDecl *FD) {
+    return add_decl(new FuncSplitForwardDecl(FD));
+  }
   FuncTemplateDecl *decl_func_template(QualName Name,
                                        std::vector<VarDecl *> TemplateParams,
                                        Type *RetTy,
@@ -140,21 +149,38 @@ private:
     return add_decl(
         new UnionTemplateDecl(*this, decl_union(T, false), TemplateParams));
   }
-  MethodDecl *decl_method(QualName Name, ClassOrUnion *C, Type *RetTy,
+  MethodDecl *decl_method(QualName Name, Type *RetTy,
                           std::vector<VarDecl *> Params,
                           bool IsVarArgs = false) {
-    return add_decl(new MethodDecl(*this, C, Name, RetTy, Params, IsVarArgs));
+    return add_decl(new MethodDecl(*this, Name, RetTy, Params, IsVarArgs));
   }
-  CtorDecl *decl_ctor(ClassOrUnion *C, std::vector<VarDecl *> Params,
+  MethodSplitDecl *decl_method_split(QualName Name, ClassOrUnion *C,
+                                     Type *RetTy, std::vector<VarDecl *> Params,
+                                     bool IsVarArgs = false) {
+    return add_decl(
+        new MethodSplitDecl(*this, C, Name, RetTy, Params, IsVarArgs));
+  }
+  MethodSplitForwardDecl *decl_method_split_forward(MethodSplitDecl *MD) {
+    return add_decl(new MethodSplitForwardDecl(MD));
+  }
+
+  CtorDecl *decl_ctor(QualName Name, std::vector<VarDecl *> Params,
                       bool IsVarArgs = false) {
-    return add_decl(new CtorDecl(*this, C, Params, IsVarArgs));
+    return add_decl(new CtorDecl(*this, Name, Params, IsVarArgs));
+  }
+  CtorSplitDecl *decl_ctor_split(ClassOrUnion *C, std::vector<VarDecl *> Params,
+                                 bool IsVarArgs = false) {
+    return add_decl(new CtorSplitDecl(*this, C, Params, IsVarArgs));
+  }
+  CtorSplitForwardDecl *decl_ctor_split_forward(CtorSplitDecl *CD) {
+    return add_decl(new CtorSplitForwardDecl(CD));
   }
   MethodTemplateDecl *
-  decl_method_template(QualName Name, ClassOrUnion *C,
-                       std::vector<VarDecl *> TemplateParams, Type *RetTy,
-                       std::vector<VarDecl *> Params, bool IsVarArgs = false) {
+  decl_method_template(QualName Name, std::vector<VarDecl *> TemplateParams,
+                       Type *RetTy, std::vector<VarDecl *> Params,
+                       bool IsVarArgs = false) {
     return add_decl(new MethodTemplateDecl(
-        *this, decl_method(Name, C, RetTy, Params, IsVarArgs), TemplateParams));
+        *this, decl_method(Name, RetTy, Params, IsVarArgs), TemplateParams));
   }
   EnumDecl *decl_enum_class(EnumClass *T, bool IsForward = false) {
     return add_decl(new EnumDecl(T, IsForward));

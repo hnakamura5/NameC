@@ -5,14 +5,14 @@
 #include "internal/Gen/Emit.h"
 #include "internal/Gen/File.h"
 #include "internal/Gen/Forwards.h"
-#include "internal/Gen/MixIns.h"
+#include "internal/Gen/Mixins.h"
 #include "internal/Gen/Stmts.h"
 
 namespace namec {
 // File TopLevel is split by if directives
 class TopLevel : public Emit,
                  public DirectiveDefineMixin,
-                 public UbiquitousDeclStmtMixIn {
+                 public UbiquitousDeclStmtMixin {
   Context &C;
   std::vector<Emit *> Entries;
 
@@ -22,7 +22,7 @@ protected:
 
 public:
   TopLevel(Context &C)
-      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
+      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixin(C) {}
   // Only in top level we can define/declare functions
   FuncDecl *def_func(std::string Name, Type *RetTy,
                      std::vector<VarDecl *> Params, bool IsVarArg = false);
@@ -34,8 +34,8 @@ protected:
 // Scope is for normal scope, such as function body, if body, etc.
 class Scope : public Emit,
               public DirectiveDefineMixin,
-              public UbiquitousDeclStmtMixIn,
-              public InFunctionStmtMixIn {
+              public UbiquitousDeclStmtMixin,
+              public InFunctionStmtMixin {
   Context &C;
 
   std::vector<Emit *> Entries;
@@ -48,8 +48,8 @@ protected:
 
 public:
   Scope(Context &C)
-      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C),
-        InFunctionStmtMixIn(C) {}
+      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixin(C),
+        InFunctionStmtMixin(C) {}
   virtual ~Scope() {}
   void emit_impl(std::ostream &SS) override;
 };
@@ -57,8 +57,8 @@ public:
 // MacroFuncScope is only as the toplevel scope of a macro function
 // Here directives are not allowed.
 class MacroFuncScope : public Emit,
-                       public UbiquitousDeclStmtMixIn,
-                       public InFunctionStmtMixIn {
+                       public UbiquitousDeclStmtMixin,
+                       public InFunctionStmtMixin {
   Context &C;
   std::vector<Emit *> Entries;
   std::vector<std::unique_ptr<Stmt>> Stmts;
@@ -69,7 +69,7 @@ protected:
 
 public:
   MacroFuncScope(Context &C)
-      : C(C), UbiquitousDeclStmtMixIn(C), InFunctionStmtMixIn(C) {}
+      : C(C), UbiquitousDeclStmtMixin(C), InFunctionStmtMixin(C) {}
   virtual ~MacroFuncScope() {}
   void emit_impl(std::ostream &SS) override;
 };

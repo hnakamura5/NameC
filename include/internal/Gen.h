@@ -8,7 +8,7 @@
 #include "internal/Gen/Exprs.h"
 #include "internal/Gen/File.h"
 #include "internal/Gen/Forwards.h"
-#include "internal/Gen/MixIns.h"
+#include "internal/Gen/Mixins.h"
 #include "internal/Gen/Scope.h"
 #include "internal/Gen/Stmts.h"
 #include "internal/Gen/Types.h"

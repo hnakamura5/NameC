@@ -14,7 +14,8 @@ namespace namecxx {
 
 class TopLevel : public Emit,
                  public DirectiveDefineMixin,
-                 public UbiquitousDeclStmtMixIn {
+                 public UbiquitousDeclStmtMixin,
+                 public ClassMemberDeclMixin {
   Context &C;
   std::vector<Emit *> Entries;
   std::vector<std::unique_ptr<Namespace>> Namespaces;
@@ -22,13 +23,20 @@ class TopLevel : public Emit,
 protected:
   void on_add_directive(Directive *D) override { Entries.push_back(D); }
   void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
+  void on_add_class_member_decl(Decl *D) override { Entries.push_back(D); }
+  void on_add_class_member_stmt_decl(Stmt *D) override { Entries.push_back(D); }
 
 public:
   TopLevel(Context &C)
-      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
+      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixin(C),
+        ClassMemberDeclMixin(C) {}
   // Only in top level we can define/declare functions
   FuncDecl *def_func(QualName Name, Type *RetTy, std::vector<VarDecl *> Params,
                      bool IsVarArg = false);
+  FuncSplitDecl *def_func_declare(QualName Name, Type *RetTy,
+                                  std::vector<VarDecl *> Params,
+                                  bool IsVarArg = false);
+  void def_func_define(FuncSplitDecl *Decl);
   FuncTemplateDecl *def_func_template(QualName Name,
                                       std::vector<VarDecl *> TemplateParams,
                                       Type *RetTy,
@@ -37,27 +45,35 @@ public:
   TopLevel *def_namespace(QualName Name);
   UsingNamespaceStmt *stmt_using_namespace(QualName Name);
 
+  // TopLevel Member definition API
+  void def_method_define(MethodSplitDecl *Decl);
+  CtorDecl *def_ctor(QualName ClassName, std::vector<VarDecl *> Params,
+                     bool IsVarArgs = false);
+  void def_ctor_define(CtorSplitDecl *CD);
+  MethodDecl *def_dtor(QualName ClassName);
+  void def_dtor_define(MethodSplitDecl *MD);
+
 protected:
   void emit_impl(std::ostream &SS) override;
 };
 
 class FuncScope : public Emit,
                   public DirectiveDefineMixin,
-                  public InFunctionStmtMixIn,
-                  public UbiquitousDeclStmtMixIn {
+                  public InFunctionStmtMixin,
+                  public UbiquitousDeclStmtMixin {
   Context &C;
 
   std::vector<Emit *> Entries;
 
 protected:
-  virtual void on_add_directive(Directive *D) override { Entries.push_back(D); }
-  virtual void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
-  virtual void on_add_stmt(Stmt *S) override { Entries.push_back(S); }
+  void on_add_directive(Directive *D) override { Entries.push_back(D); }
+  void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
+  void on_add_stmt(Stmt *S) override { Entries.push_back(S); }
 
 public:
   FuncScope(Context &C)
-      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C),
-        InFunctionStmtMixIn(C) {}
+      : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixin(C),
+        InFunctionStmtMixin(C) {}
   UsingNamespaceStmt *stmt_using_namespace(QualName Name);
   virtual ~FuncScope() {}
 
@@ -66,18 +82,18 @@ protected:
 };
 
 class MacroFuncScope : public Emit,
-                       public UbiquitousDeclStmtMixIn,
-                       public InFunctionStmtMixIn {
+                       public UbiquitousDeclStmtMixin,
+                       public InFunctionStmtMixin {
   Context &C;
   std::vector<Emit *> Entries;
 
 protected:
-  virtual void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
-  virtual void on_add_stmt(Stmt *S) override { Entries.push_back(S); }
+  void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
+  void on_add_stmt(Stmt *S) override { Entries.push_back(S); }
 
 public:
   MacroFuncScope(Context &C)
-      : C(C), UbiquitousDeclStmtMixIn(C), InFunctionStmtMixIn(C) {}
+      : C(C), UbiquitousDeclStmtMixin(C), InFunctionStmtMixin(C) {}
   virtual ~MacroFuncScope() {}
 
 protected:
@@ -86,43 +102,34 @@ protected:
 
 class ClassTopLevel : public Emit,
                       public DirectiveDefineMixin,
-                      public UbiquitousDeclStmtMixIn {
+                      public UbiquitousDeclStmtMixin,
+                      public ClassMemberDeclMixin {
   Context &C;
   ClassOrUnion *Cls;
 
   std::vector<Emit *> Entries;
   std::vector<std::unique_ptr<Namespace>> Namespaces;
-  std::vector<std::unique_ptr<Stmt>> Stmts;
-
-  template <typename T> DeclStmt *add_stmt_decl(T *D) {
-    auto *S = new DeclStmt(C, D);
-    Stmts.push_back(std::unique_ptr<Stmt>(S));
-    return S;
-  }
 
 protected:
-  virtual void on_add_directive(Directive *D) override { Entries.push_back(D); }
-  virtual void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
+  void on_add_directive(Directive *D) override { Entries.push_back(D); }
+  void on_add_decl_stmt(Stmt *S) override { Entries.push_back(S); }
+  void on_add_class_member_decl(Decl *D) override { Entries.push_back(D); }
+  void on_add_class_member_stmt_decl(Stmt *D) override { Entries.push_back(D); }
 
 public:
   ClassTopLevel(Context &C, ClassOrUnion *Cls)
-      : C(C), Cls(Cls), DirectiveDefineMixin(C), UbiquitousDeclStmtMixIn(C) {}
+      : C(C), Cls(Cls), DirectiveDefineMixin(C), UbiquitousDeclStmtMixin(C),
+        ClassMemberDeclMixin(C) {}
   virtual ~ClassTopLevel() {}
 
-  TopLevel *def_namespace(QualName Name);
-  VarDecl *def_field(QualName Name, Type *T, Expr *Init = nullptr);
-  VarTemplateDecl *def_field_template(QualName Name,
-                                      std::vector<VarDecl *> TemplateParams,
-                                      Type *T, Expr *Init = nullptr);
-  MethodDecl *def_method(QualName Name, Type *RetTy,
-                         std::vector<VarDecl *> Params, bool IsVarArgs = false);
-  MethodTemplateDecl *def_method_template(QualName Name,
-                                          std::vector<VarDecl *> TemplateParams,
-                                          Type *RetTy,
-                                          std::vector<VarDecl *> Params,
-                                          bool IsVarArgs = false);
+  MethodSplitDecl *def_method_declare(QualName Name, Type *RetTy,
+                                      std::vector<VarDecl *> Params,
+                                      bool IsVarArgs = false);
   CtorDecl *def_ctor(std::vector<VarDecl *> Params, bool IsVarArgs = false);
+  CtorSplitDecl *def_ctor_declare(std::vector<VarDecl *> Params,
+                                  bool IsVarArgs = false);
   MethodDecl *def_dtor();
+  MethodSplitDecl *def_dtor_declare();
 
 protected:
   void emit_impl(std::ostream &SS) override;

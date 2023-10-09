@@ -7,7 +7,7 @@
 #include "internal/Gen/Types.h"
 
 namespace namec {
-class UbiquitousDeclStmtMixIn;
+class UbiquitousDeclStmtMixin;
 
 // Context manage Scope, Decl and Expr heap existence. Stmt are kept in Scope.
 // This also exists to eliminate complex circular dependency between Scope,
@@ -16,7 +16,7 @@ class Context {
   friend class CFile;
   friend class Scope;
   friend class TopLevel;
-  friend class UbiquitousDeclStmtMixIn;
+  friend class UbiquitousDeclStmtMixin;
 
   std::vector<std::unique_ptr<Scope>> Scopes;
   std::vector<std::unique_ptr<Decl>> Decls;

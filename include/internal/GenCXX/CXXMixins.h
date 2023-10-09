@@ -56,7 +56,7 @@ public:
   RawDirective *insert_line_comment(std::string Comment);
 };
 
-class UbiquitousDeclStmtMixIn {
+class UbiquitousDeclStmtMixin {
   Context &C;
   std::vector<std::unique_ptr<Stmt>> Stmts;
 
@@ -71,8 +71,8 @@ protected:
   virtual void on_add_decl_stmt(Stmt *S) = 0;
 
 public:
-  UbiquitousDeclStmtMixIn(Context &C) : C(C) {}
-  virtual ~UbiquitousDeclStmtMixIn() {}
+  UbiquitousDeclStmtMixin(Context &C) : C(C) {}
+  virtual ~UbiquitousDeclStmtMixin() {}
 
   RawDecl *def_raw(std::string Val);
   VarDecl *def_var(QualName Name, Type *T, Expr *Init = nullptr);
@@ -102,7 +102,7 @@ public:
                                         Type *T);
 };
 
-class InFunctionStmtMixIn {
+class InFunctionStmtMixin {
   Context &C;
   std::vector<std::unique_ptr<Stmt>> Stmts;
 
@@ -116,8 +116,8 @@ protected:
   virtual void on_add_stmt(Stmt *S) = 0;
 
 public:
-  InFunctionStmtMixIn(Context &C) : C(C) {}
-  virtual ~InFunctionStmtMixIn() {}
+  InFunctionStmtMixin(Context &C) : C(C) {}
+  virtual ~InFunctionStmtMixin() {}
 
   RawStmt *stmt_raw(std::string Val);
   RawStmt *stmt_empty();
@@ -149,6 +149,34 @@ public:
   ExprStmt *stmt_va_start(Expr *VaList, Expr *Count);
   ExprStmt *stmt_va_copy(Expr *Dest, Expr *Src);
   ExprStmt *stmt_va_end(Expr *Arg);
+};
+
+class ClassMemberDeclMixin {
+  Context &C;
+  std::vector<std::unique_ptr<Stmt>> Stmts;
+
+  template <typename T> DeclStmt *add_stmt_decl(T *D) {
+    auto *S = new DeclStmt(C, D);
+    Stmts.push_back(std::unique_ptr<Stmt>(S));
+    return S;
+  }
+
+  virtual void on_add_class_member_decl(Decl *D) = 0;
+  virtual void on_add_class_member_stmt_decl(Stmt *D) = 0;
+
+public:
+  ClassMemberDeclMixin(Context &C) : C(C) {}
+  VarDecl *def_field(QualName Name, Type *T, Expr *Init = nullptr);
+  VarTemplateDecl *def_field_template(QualName Name,
+                                      std::vector<VarDecl *> TemplateParams,
+                                      Type *T, Expr *Init = nullptr);
+  MethodDecl *def_method(QualName Name, Type *RetTy,
+                         std::vector<VarDecl *> Params, bool IsVarArgs = false);
+  MethodTemplateDecl *def_method_template(QualName Name,
+                                          std::vector<VarDecl *> TemplateParams,
+                                          Type *RetTy,
+                                          std::vector<VarDecl *> Params,
+                                          bool IsVarArgs = false);
 };
 
 } // namespace namecxx

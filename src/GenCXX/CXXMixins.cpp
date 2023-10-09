@@ -70,175 +70,205 @@ RawDirective *DirectiveDefineMixin::insert_line_comment(std::string Comment) {
   return directive_raw("// " + Comment + "\n");
 }
 
-// Definitions for UbiquitousDeclStmtMixIn methods
-RawDecl *UbiquitousDeclStmtMixIn::def_raw(std::string Val) {
+// Definitions for UbiquitousDeclStmtMixin methods
+RawDecl *UbiquitousDeclStmtMixin::def_raw(std::string Val) {
   return add(C.decl_raw(Val));
 }
 
-VarDecl *UbiquitousDeclStmtMixIn::def_var(QualName Name, Type *T, Expr *Init) {
+VarDecl *UbiquitousDeclStmtMixin::def_var(QualName Name, Type *T, Expr *Init) {
   return add(C.decl_var(Name, T, Init));
 }
 
-VarTemplateDecl *UbiquitousDeclStmtMixIn::def_var_template(
+VarTemplateDecl *UbiquitousDeclStmtMixin::def_var_template(
     QualName Name, std::vector<VarDecl *> TemplateParams, Type *T, Expr *Init) {
   return add(C.decl_var_template(Name, TemplateParams, T, Init));
 }
 
-ArrayVarDecl *UbiquitousDeclStmtMixIn::def_array_var(QualName Name, Type *T,
+ArrayVarDecl *UbiquitousDeclStmtMixin::def_array_var(QualName Name, Type *T,
                                                      std::vector<Expr *> Size,
                                                      Expr *Init) {
   return add(C.decl_array_var(Name, T, Size, Init));
 }
 
-ClassDecl *UbiquitousDeclStmtMixIn::def_struct(
+ClassDecl *UbiquitousDeclStmtMixin::def_struct(
     QualName Name, std::vector<std::pair<AccessSpec, Type *>> Bases) {
   return add(C.decl_class(C.type_class(Name, Bases, true)));
 }
 
-ClassDecl *UbiquitousDeclStmtMixIn::def_class(
+ClassDecl *UbiquitousDeclStmtMixin::def_class(
     QualName Name, std::vector<std::pair<AccessSpec, Type *>> Bases) {
   return add(C.decl_class(C.type_class(Name, Bases, false)));
 }
 
-ClassTemplateDecl *UbiquitousDeclStmtMixIn::def_struct_template(
+ClassTemplateDecl *UbiquitousDeclStmtMixin::def_struct_template(
     QualName Name, std::vector<VarDecl *> TemplateParams,
     std::vector<std::pair<AccessSpec, Type *>> Bases) {
   return add(
       C.decl_class_template(C.type_class(Name, Bases, true), TemplateParams));
 }
 
-ClassTemplateDecl *UbiquitousDeclStmtMixIn::def_class_template(
+ClassTemplateDecl *UbiquitousDeclStmtMixin::def_class_template(
     QualName Name, std::vector<VarDecl *> TemplateParams,
     std::vector<std::pair<AccessSpec, Type *>> Bases) {
   return add(
       C.decl_class_template(C.type_class(Name, Bases, false), TemplateParams));
 }
 
-UnionDecl *UbiquitousDeclStmtMixIn::def_union(QualName Name) {
+UnionDecl *UbiquitousDeclStmtMixin::def_union(QualName Name) {
   return add(C.decl_union(C.type_union(Name)));
 }
 
-UnionTemplateDecl *UbiquitousDeclStmtMixIn::def_union_template(
+UnionTemplateDecl *UbiquitousDeclStmtMixin::def_union_template(
     QualName Name, std::vector<VarDecl *> TemplateParams) {
   return add(C.decl_union_template(C.type_union(Name), TemplateParams));
 }
 
-EnumDecl *UbiquitousDeclStmtMixIn::def_enum(QualName Name) {
+EnumDecl *UbiquitousDeclStmtMixin::def_enum(QualName Name) {
   return add(C.decl_enum(C.type_enum(Name)));
 }
 
-TypedefDecl *UbiquitousDeclStmtMixIn::def_typedef(QualName Name, Type *T) {
+TypedefDecl *UbiquitousDeclStmtMixin::def_typedef(QualName Name, Type *T) {
   return add(C.decl_typedef(Name, T));
 }
 
-UsingDecl *UbiquitousDeclStmtMixIn::def_using(QualName Name, Type *T) {
+UsingDecl *UbiquitousDeclStmtMixin::def_using(QualName Name, Type *T) {
   return add(C.decl_using(Name, T));
 }
-UsingTemplateDecl *UbiquitousDeclStmtMixIn::def_using_template(
+UsingTemplateDecl *UbiquitousDeclStmtMixin::def_using_template(
     QualName Name, std::vector<VarDecl *> TemplateParams, Type *T) {
   return add(C.decl_using_template(Name, TemplateParams, T));
 }
 
-// Definitions for InFunctionStmtMixIn methods
-RawStmt *InFunctionStmtMixIn::stmt_raw(std::string Val) {
+// Definitions for InFunctionStmtMixin methods
+RawStmt *InFunctionStmtMixin::stmt_raw(std::string Val) {
   return add(new RawStmt(C, Val));
 }
 
-RawStmt *InFunctionStmtMixIn::stmt_empty() { return stmt_raw(";"); }
+RawStmt *InFunctionStmtMixin::stmt_empty() { return stmt_raw(";"); }
 
-DeclStmt *InFunctionStmtMixIn::stmt_decl(Decl *D) {
+DeclStmt *InFunctionStmtMixin::stmt_decl(Decl *D) {
   return add(new DeclStmt(C, D));
 }
 
-ExprStmt *InFunctionStmtMixIn::stmt_expr(Expr *E) {
+ExprStmt *InFunctionStmtMixin::stmt_expr(Expr *E) {
   return add(new ExprStmt(C, E));
 }
 
-IfStmt *InFunctionStmtMixIn::stmt_if(Expr *Cond, VarDecl *Init,
+IfStmt *InFunctionStmtMixin::stmt_if(Expr *Cond, VarDecl *Init,
                                      bool IsConstExpr) {
   return add(new IfStmt(C, Cond, Init, IsConstExpr));
 }
 
-WhileStmt *InFunctionStmtMixIn::stmt_while(Expr *Cond) {
+WhileStmt *InFunctionStmtMixin::stmt_while(Expr *Cond) {
   return add(new WhileStmt(C, Cond));
 }
 
-ForStmt *InFunctionStmtMixIn::stmt_for(VarDecl *Init, Expr *Cond, Expr *Step) {
+ForStmt *InFunctionStmtMixin::stmt_for(VarDecl *Init, Expr *Cond, Expr *Step) {
   auto InitStmt = std::make_unique<DeclStmt>(C, Init);
   ForStmt *S = new ForStmt(C, std::move(InitStmt), Cond, Step);
   return add(S);
 }
 
-ForStmt *InFunctionStmtMixIn::stmt_for(Expr *Init, Expr *Cond, Expr *Step) {
+ForStmt *InFunctionStmtMixin::stmt_for(Expr *Init, Expr *Cond, Expr *Step) {
   auto InitStmt = std::make_unique<ExprStmt>(C, Init);
   ForStmt *S = new ForStmt(C, std::move(InitStmt), Cond, Step);
   return add(S);
 }
 
-ForRangeStmt *InFunctionStmtMixIn::stmt_for_range(VarDecl *Init, Expr *Range) {
+ForRangeStmt *InFunctionStmtMixin::stmt_for_range(VarDecl *Init, Expr *Range) {
   return add(new ForRangeStmt(C, Init, Range));
 }
 
-DoStmt *InFunctionStmtMixIn::stmt_do(Expr *Cond) {
+DoStmt *InFunctionStmtMixin::stmt_do(Expr *Cond) {
   return add(new DoStmt(C, Cond));
 }
 
-BlockStmt *InFunctionStmtMixIn::stmt_block() { return add(new BlockStmt(C)); }
+BlockStmt *InFunctionStmtMixin::stmt_block() { return add(new BlockStmt(C)); }
 
-ReturnStmt *InFunctionStmtMixIn::stmt_return(Expr *Val) {
+ReturnStmt *InFunctionStmtMixin::stmt_return(Expr *Val) {
   return add(new ReturnStmt(C, Val));
 }
 
-BreakStmt *InFunctionStmtMixIn::stmt_break() { return add(new BreakStmt(C)); }
-ContinueStmt *InFunctionStmtMixIn::stmt_continue() {
+BreakStmt *InFunctionStmtMixin::stmt_break() { return add(new BreakStmt(C)); }
+ContinueStmt *InFunctionStmtMixin::stmt_continue() {
   return add(new ContinueStmt(C));
 }
 
-LabelStmt *InFunctionStmtMixIn::stmt_label(std::string Name, Stmt *S) {
+LabelStmt *InFunctionStmtMixin::stmt_label(std::string Name, Stmt *S) {
   return add(new LabelStmt(C, Name, S));
 }
 
-GotoStmt *InFunctionStmtMixIn::stmt_goto(std::string Name) {
+GotoStmt *InFunctionStmtMixin::stmt_goto(std::string Name) {
   return add(new GotoStmt(C, Name));
 }
 
-SwitchStmt *InFunctionStmtMixIn::stmt_switch(Expr *Cond, VarDecl *Init) {
+SwitchStmt *InFunctionStmtMixin::stmt_switch(Expr *Cond, VarDecl *Init) {
   return add(new SwitchStmt(C, Cond, Init));
 }
 
-ExprStmt *InFunctionStmtMixIn::stmt_delete(Expr *Val, bool IsArray) {
+ExprStmt *InFunctionStmtMixin::stmt_delete(Expr *Val, bool IsArray) {
   return stmt_expr(C.expr_delete(Val, IsArray));
 }
 
-ThrowStmt *InFunctionStmtMixIn::stmt_throw(Expr *Val) {
+ThrowStmt *InFunctionStmtMixin::stmt_throw(Expr *Val) {
   return add(new ThrowStmt(C, Val));
 }
 
-TryStmt *InFunctionStmtMixIn::stmt_try() { return add(new TryStmt(C)); }
+TryStmt *InFunctionStmtMixin::stmt_try() { return add(new TryStmt(C)); }
 
-ExprStmt *InFunctionStmtMixIn::stmt_assign(Expr *LHS, Expr *RHS) {
+ExprStmt *InFunctionStmtMixin::stmt_assign(Expr *LHS, Expr *RHS) {
   return stmt_expr(C.expr_binary("=", LHS, RHS));
 }
 
-ExprStmt *InFunctionStmtMixIn::stmt_call(Expr *Callee,
+ExprStmt *InFunctionStmtMixin::stmt_call(Expr *Callee,
                                          std::vector<Expr *> Args) {
   return stmt_expr(C.expr_call(Callee, Args));
 }
 
-VarDecl *InFunctionStmtMixIn::stmt_va_list(std::string Name) {
+VarDecl *InFunctionStmtMixin::stmt_va_list(std::string Name) {
   auto *D = C.decl_var(Name, C.type_va_list());
   add(new DeclStmt(C, D));
   return D;
 }
 
-ExprStmt *InFunctionStmtMixIn::stmt_va_start(Expr *VaList, Expr *Count) {
+ExprStmt *InFunctionStmtMixin::stmt_va_start(Expr *VaList, Expr *Count) {
   return stmt_call(C.expr_var_name("va_start"), {VaList, Count});
 }
 
-ExprStmt *InFunctionStmtMixIn::stmt_va_end(Expr *Arg) {
+ExprStmt *InFunctionStmtMixin::stmt_va_end(Expr *Arg) {
   return stmt_call(C.expr_var_name("va_end"), {Arg});
 }
 
-ExprStmt *InFunctionStmtMixIn::stmt_va_copy(Expr *Dest, Expr *Src) {
+ExprStmt *InFunctionStmtMixin::stmt_va_copy(Expr *Dest, Expr *Src) {
   return stmt_call(C.expr_var_name("va_copy"), {Dest, Src});
+}
+
+VarDecl *ClassMemberDeclMixin ::def_field(QualName Name, Type *T, Expr *Init) {
+  auto *D = C.decl_var(Name, T, Init);
+  on_add_class_member_stmt_decl(add_stmt_decl(D));
+  return D;
+}
+
+VarTemplateDecl *ClassMemberDeclMixin ::def_field_template(
+    QualName Name, std::vector<VarDecl *> TemplateParams, Type *T, Expr *Init) {
+  auto *D = C.decl_var_template(Name, TemplateParams, T, Init);
+  on_add_class_member_stmt_decl(add_stmt_decl(D));
+  return D;
+}
+
+MethodDecl *ClassMemberDeclMixin ::def_method(QualName Name, Type *RetTy,
+                                              std::vector<VarDecl *> Params,
+                                              bool IsVarArgs) {
+  auto *D = C.decl_method(Name, RetTy, Params, IsVarArgs);
+  on_add_class_member_decl(D);
+  return D;
+}
+
+MethodTemplateDecl *ClassMemberDeclMixin ::def_method_template(
+    QualName Name, std::vector<VarDecl *> TemplateParams, Type *RetTy,
+    std::vector<VarDecl *> Params, bool IsVarArgs) {
+  auto *D =
+      C.decl_method_template(Name, TemplateParams, RetTy, Params, IsVarArgs);
+  on_add_class_member_decl(D);
+  return D;
 }

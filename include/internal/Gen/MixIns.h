@@ -52,7 +52,7 @@ public:
   RawDirective *insert_line_comment(std::string Comment);
 };
 
-class UbiquitousDeclStmtMixIn {
+class UbiquitousDeclStmtMixin {
   Context &C;
   std::vector<std::unique_ptr<Stmt>> Stmts;
 
@@ -67,8 +67,8 @@ protected:
   virtual void on_add_decl_stmt(Stmt *S) = 0;
 
 public:
-  UbiquitousDeclStmtMixIn(Context &C) : C(C) {}
-  virtual ~UbiquitousDeclStmtMixIn() {}
+  UbiquitousDeclStmtMixin(Context &C) : C(C) {}
+  virtual ~UbiquitousDeclStmtMixin() {}
 
   RawDecl *def_raw(std::string Val);
   VarDecl *def_var(std::string Name, Type *T, Expr *Init = nullptr);
@@ -80,7 +80,7 @@ public:
   TypedefDecl *def_typedef(std::string Name, Type *T);
 };
 
-class InFunctionStmtMixIn {
+class InFunctionStmtMixin {
   Context &C;
   std::vector<std::unique_ptr<Stmt>> Stmts;
 
@@ -94,8 +94,8 @@ protected:
   virtual void on_add_stmt(Stmt *S) = 0;
 
 public:
-  InFunctionStmtMixIn(Context &C) : C(C) {}
-  virtual ~InFunctionStmtMixIn() {}
+  InFunctionStmtMixin(Context &C) : C(C) {}
+  virtual ~InFunctionStmtMixin() {}
 
   RawStmt *stmt_raw(std::string Val);
   RawStmt *stmt_empty();

@@ -10,7 +10,7 @@
 #include "internal/Gen/Directive.h"
 #include "internal/Gen/Emit.h"
 #include "internal/Gen/Forwards.h"
-#include "internal/Gen/MixIns.h"
+#include "internal/Gen/Mixins.h"
 #include "internal/Gen/Stmts.h"
 
 namespace namec {

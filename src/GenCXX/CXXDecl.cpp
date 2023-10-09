@@ -111,7 +111,8 @@ static void emit_func_qual(std::ostream &SS, FuncDecl *D) {
   }
 }
 
-void FuncDecl::emit_impl(std::ostream &SS) {
+void FuncDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
+                              bool IsSplitDefinition) {
   emit_func_qual(SS, this);
   SS << get_ret_type();
   SS << " ";
@@ -127,7 +128,7 @@ void FuncDecl::emit_impl(std::ostream &SS) {
     SS << ",...";
   }
   SS << ")";
-  if (Body) {
+  if (!IsForward) {
     SS << "{";
     SS << Body;
     SS << "}";
@@ -135,6 +136,18 @@ void FuncDecl::emit_impl(std::ostream &SS) {
     // Forward declaration
     SS << ";";
   }
+}
+
+void FuncDecl::emit_impl(std::ostream &SS) {
+  return emit_impl_impl(SS, !Body, false);
+}
+
+void FuncSplitForwardDecl::emit_impl(std::ostream &SS) {
+  FD->emit_impl_impl(SS, true, true);
+}
+
+void FuncSplitDecl::emit_impl(std::ostream &SS) {
+  emit_impl_impl(SS, false, true);
 }
 
 QualName ClassDecl::get_name() { return C->get_name_str(); }
@@ -159,12 +172,18 @@ void UnionDecl::emit_impl(std::ostream &SS) {
   }
 }
 
-static void emit_method_qual(std::ostream &SS, MethodDecl *D) {
-  if (D->is_override()) {
+static void emit_method_qual(std::ostream &SS, MethodDecl *D,
+                             bool IsSplitDefinition) {
+  if (D->is_override() && !IsSplitDefinition) {
     SS << "override ";
   }
   if (D->is_const()) {
     SS << "const ";
+  }
+  if (IsSplitDefinition) {
+    // The following definitions are not usable in split definition.
+    // TODO: more semantic way to avoid this conflict
+    return;
   }
   if (D->is_abstract()) {
     SS << "=0;";
@@ -180,9 +199,10 @@ static void emit_method_qual(std::ostream &SS, MethodDecl *D) {
   }
 }
 
-void MethodDecl::emit_impl(std::ostream &SS) {
+void MethodDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
+                                bool IsSplitDefinition) {
   emit_func_qual(SS, this);
-  if (is_virtual()) {
+  if (is_virtual() && !IsSplitDefinition) {
     SS << "virtual ";
   }
   if (get_ret_type()) {
@@ -196,22 +216,38 @@ void MethodDecl::emit_impl(std::ostream &SS) {
     SS << ",...";
   }
   SS << ")";
-  emit_method_qual(SS, this);
-  if (Body) {
+  emit_method_qual(SS, this, IsSplitDefinition);
+  if (!IsForward) {
     SS << "{" << Body << "}";
   } else {
     // Forward declaration
     SS << ";";
   }
 }
+MethodSplitDecl::MethodSplitDecl(Context &C, ClassOrUnion *Parent,
+                                 QualName Name, Type *RetTy,
+                                 std::vector<VarDecl *> Params, bool IsVarArg)
+    : MethodDecl(C, C.QN(Parent->get_name(), Name), RetTy, Params, IsVarArg),
+      Parent(Parent) {}
 
-CtorDecl::CtorDecl(Context &C, ClassOrUnion *Parent,
-                   std::vector<VarDecl *> Params, bool IsVarArg)
-    : MethodDecl(C, Parent, Name, nullptr, Params, IsVarArg) {}
+void MethodDecl::emit_impl(std::ostream &SS) {
+  emit_impl_impl(SS, !Body, false);
+}
+void MethodSplitDecl::emit_impl(std::ostream &SS) {
+  emit_impl_impl(SS, false, true);
+}
+void MethodSplitForwardDecl::emit_impl(std::ostream &SS) {
+  MD->emit_impl_impl(SS, true, true);
+}
 
-void CtorDecl::emit_impl(std::ostream &SS) {
+CtorDecl::CtorDecl(Context &C, QualName Name, std::vector<VarDecl *> Params,
+                   bool IsVarArg)
+    : MethodDecl(C, Name, nullptr, Params, IsVarArg) {}
+
+void CtorDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
+                              bool IsSplitDefinition) {
   emit_func_qual(SS, this);
-  SS << Parent->get_name().last();
+  SS << get_name().to_string();
   SS << "(";
   for (auto I = 0; I < Params.size(); ++I) {
     SS << Params[I];
@@ -223,7 +259,7 @@ void CtorDecl::emit_impl(std::ostream &SS) {
     SS << ",...";
   }
   SS << ")";
-  emit_method_qual(SS, this);
+  emit_method_qual(SS, this, IsSplitDefinition);
   if (Inits.size() > 0) {
     SS << ":" << join_map(inits(), ",", [](auto &P) {
       return P->first.to_string() + "(" + P->second->to_string() + ")";
@@ -235,6 +271,19 @@ void CtorDecl::emit_impl(std::ostream &SS) {
     // Forward declaration
     SS << ";";
   }
+}
+CtorSplitDecl::CtorSplitDecl(Context &C, ClassOrUnion *Parent,
+                             std::vector<VarDecl *> Params, bool IsVarArg)
+    : CtorDecl(C, C.QN(Parent->get_name(), Parent->get_name().last()), Params,
+               IsVarArg),
+      Parent(Parent){};
+
+void CtorDecl::emit_impl(std::ostream &SS) { emit_impl_impl(SS, !Body, false); }
+void CtorSplitDecl::emit_impl(std::ostream &SS) {
+  emit_impl_impl(SS, false, true);
+}
+void CtorSplitForwardDecl::emit_impl(std::ostream &SS) {
+  CD->emit_impl_impl(SS, true, true);
 }
 
 QualName EnumDecl::get_name() { return E->get_name_str(); }
