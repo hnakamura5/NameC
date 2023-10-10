@@ -172,9 +172,9 @@ void UnionDecl::emit_impl(std::ostream &SS) {
   }
 }
 
-static void emit_method_qual(std::ostream &SS, MethodDecl *D,
+static void emit_method_qual(std::ostream &SS, MethodDecl *D, bool IsForward,
                              bool IsSplitDefinition) {
-  if (D->is_override() && !IsSplitDefinition) {
+  if (D->is_override() && (IsForward || !IsSplitDefinition)) {
     SS << "override ";
   }
   if (D->is_const()) {
@@ -210,13 +210,17 @@ void MethodDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
     SS << get_ret_type();
   }
   SS << " ";
-  SS << get_name_str();
-  SS << "(" << join(params()) << ")";
+  if (IsForward) {
+    SS << get_name().last();
+  } else {
+    SS << get_name_str();
+  }
+  SS << "(" << join(params());
   if (is_vararg()) {
     SS << ",...";
   }
   SS << ")";
-  emit_method_qual(SS, this, IsSplitDefinition);
+  emit_method_qual(SS, this, IsForward, IsSplitDefinition);
   if (!IsForward) {
     SS << "{" << Body << "}";
   } else {
@@ -228,7 +232,9 @@ MethodSplitDecl::MethodSplitDecl(Context &C, ClassOrUnion *Parent,
                                  QualName Name, Type *RetTy,
                                  std::vector<VarDecl *> Params, bool IsVarArg)
     : MethodDecl(C, C.QN(Parent->get_name(), Name), RetTy, Params, IsVarArg),
-      Parent(Parent) {}
+      Parent(Parent) {
+  get_or_add_body();
+}
 
 void MethodDecl::emit_impl(std::ostream &SS) {
   emit_impl_impl(SS, !Body, false);
@@ -259,7 +265,7 @@ void CtorDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
     SS << ",...";
   }
   SS << ")";
-  emit_method_qual(SS, this, IsSplitDefinition);
+  emit_method_qual(SS, this, IsForward, IsSplitDefinition);
   if (Inits.size() > 0) {
     SS << ":" << join_map(inits(), ",", [](auto &P) {
       return P->first.to_string() + "(" + P->second->to_string() + ")";
@@ -276,7 +282,9 @@ CtorSplitDecl::CtorSplitDecl(Context &C, ClassOrUnion *Parent,
                              std::vector<VarDecl *> Params, bool IsVarArg)
     : CtorDecl(C, C.QN(Parent->get_name(), Parent->get_name().last()), Params,
                IsVarArg),
-      Parent(Parent){};
+      Parent(Parent) {
+  get_or_add_body();
+};
 
 void CtorDecl::emit_impl(std::ostream &SS) { emit_impl_impl(SS, !Body, false); }
 void CtorSplitDecl::emit_impl(std::ostream &SS) {

@@ -42,6 +42,28 @@ UsingNamespaceStmt *TopLevel::stmt_using_namespace(QualName Name) {
   return D;
 }
 
+void TopLevel::def_method_define(MethodSplitDecl *Decl) {
+  Entries.push_back(Decl);
+}
+
+CtorDecl *TopLevel::def_ctor(QualName ClassName, std::vector<VarDecl *> Params,
+                             bool IsVarArgs) {
+  auto *D = C.decl_ctor(ClassName.last(), Params, IsVarArgs);
+  Entries.push_back(D);
+  return D;
+}
+
+void TopLevel::def_ctor_define(CtorSplitDecl *CD) { Entries.push_back(CD); }
+
+MethodDecl *TopLevel::def_dtor(QualName ClassName) {
+
+  auto *D = C.decl_method("~" + ClassName.last(), nullptr, {});
+  Entries.push_back(D);
+  return D;
+}
+
+void TopLevel::def_dtor_define(MethodSplitDecl *MD) { Entries.push_back(MD); }
+
 void TopLevel::emit_impl(std::ostream &SS) {
   for (auto *E : Entries) {
     SS << E << "\n";

@@ -180,8 +180,13 @@ protected:
 class FuncSplitDecl : public FuncDecl {
 
 public:
-  using FuncDecl::FuncDecl;
+  FuncSplitDecl(Context &C, QualName Name, Type *RetTy,
+                std::vector<VarDecl *> Params, bool IsVarArg)
+      : FuncDecl(C, Name, RetTy, Params, IsVarArg) {
+    get_or_add_body();
+  }
   bool is_split_definition() override { return true; }
+  bool get_body() { return get_or_add_body(); }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -246,19 +251,19 @@ public:
   MethodDecl(Context &C, QualName Name, Type *RetTy,
              std::vector<VarDecl *> Params, bool IsVarArg)
       : FuncDecl(C, Name, RetTy, Params, IsVarArg) {}
-  void set_override(bool IsOverride) { this->IsOverride = IsOverride; }
+  void set_override(bool IsOverride = true) { this->IsOverride = IsOverride; }
   bool is_override() { return IsOverride; }
-  void set_virtual(bool IsVirtual) { this->IsVirtual = IsVirtual; }
+  void set_virtual(bool IsVirtual = true) { this->IsVirtual = IsVirtual; }
   bool is_virtual() { return IsVirtual; }
-  void set_delete(bool IsDelete) { this->IsDelete = IsDelete; }
+  void set_delete(bool IsDelete = true) { this->IsDelete = IsDelete; }
   bool is_delete() { return IsDelete; }
-  void set_default(bool IsDefault) { this->IsDefault = IsDefault; }
+  void set_default(bool IsDefault = true) { this->IsDefault = IsDefault; }
   bool is_default() { return IsDefault; }
-  void set_abstract(bool IsAbstract) { this->IsAbstract = IsAbstract; }
+  void set_abstract(bool IsAbstract = true) { this->IsAbstract = IsAbstract; }
   bool is_abstract() { return IsAbstract; }
-  void set_const(bool IsConst) { this->IsConst = IsConst; }
+  void set_const(bool IsConst = true) { this->IsConst = IsConst; }
   bool is_const() { return IsConst; }
-  void set_final(bool IsFinal) { this->IsFinal = IsFinal; }
+  void set_final(bool IsFinal = true) { this->IsFinal = IsFinal; }
   bool is_final() { return IsFinal; }
   bool is_forward() override {
     return !Body && !IsAbstract && !IsDefault && !IsDelete;
@@ -277,6 +282,7 @@ public:
   MethodSplitDecl(Context &C, ClassOrUnion *Parent, QualName Name, Type *RetTy,
                   std::vector<VarDecl *> Params, bool IsVarArg);
   ClassOrUnion *get_parent() { return Parent; }
+  FuncScope *get_body() { return get_or_add_body(); }
 
 protected:
   bool is_split_definition() override { return true; }

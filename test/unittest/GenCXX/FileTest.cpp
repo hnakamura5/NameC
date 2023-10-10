@@ -72,14 +72,18 @@ TEST(FileTest, TemplateInstantiations) {
           ->get_or_add_body();
   TF->stmt_return(C.expr_call(
       C.expr_raw_instantiate(C.QN(TCD), {C.type_var(TV)}), {C.expr_var(Arg)}));
-  // TODO: QualName resolution?
-  EXPECT_EQ(F.to_string(), "template<typename T> "
-                           "class cls : public T{"
-                           "private:\n"
-                           "T field1;\n"
-                           "public:\n"
-                           "cls(T x):field1(x){}\n"
-                           "};\n"
-                           "template<typename T,int I> "
-                           "cls<T> func(T x){return cls<T>(x);}\n\n");
+  auto *MSD = TC->add_public_scope()->def_method_declare(
+      "method", C.type_raw("T"), {Arg});
+  MSD->set_const();
+  MSD->set_override();
+  MSD->get_body()->stmt_return(
+      C.expr_binary("+", C.expr_var(Arg), C.expr_raw("field1")));
+  T->def_method_define(MSD);
+  EXPECT_EQ(F.to_string(),
+            "template<typename T> class cls : public T{"
+            "private:\nT field1;\n"
+            "public:\ncls(T x):field1(x){}\n"
+            "public:\nT method(T x)override const ;\n};\n"
+            "template<typename T,int I> cls<T> func(T x){return cls<T>(x);}\n"
+            "T cls::method(T x)const {return x+field1;}\n\n");
 }
