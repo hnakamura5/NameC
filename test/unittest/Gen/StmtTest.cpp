@@ -53,7 +53,7 @@ TEST(StmtTest, StructDeclStmtTest) {
   auto *Str = S.def_struct("Str")->get_struct();
   Str->def_member("field1", C.type_int());
   Str->def_member("field2", C.type_int());
-  EXPECT_EQ(S.to_string(), "struct struct{int field;};");
+  EXPECT_EQ(S.to_string(), "struct Str{int field1;int field2;};");
 }
 
 TEST(StmtTest, IfStmtTest) {

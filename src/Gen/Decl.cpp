@@ -30,18 +30,10 @@ void VarDecl::emit_impl(std::ostream &SS) {
 }
 
 void ArrayVarDecl::emit_impl(std::ostream &SS) {
-  SS << get_type();
-  SS << " ";
-  SS << get_name();
-  SS << "[";
-  for (auto S : get_size()) {
-    S->emit(SS);
-    SS << "][";
-  }
-  SS << "]";
+  SS << get_type() << " " << get_name();
+  SS << "[" << join(sizes(), "][") << "]";
   if (get_init()) {
-    SS << " = ";
-    get_init()->emit(SS);
+    SS << "=" << get_init();
   }
 }
 

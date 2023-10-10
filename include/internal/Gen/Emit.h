@@ -38,7 +38,10 @@ public:
     return SS.str();
   }
 };
-
+template <typename OS> OS &operator<<(OS &SS, Emit *E) {
+  E->emit(SS);
+  return SS;
+}
 } // namespace namec
 
 #endif // NAMEC_GEN_EMIT_H

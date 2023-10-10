@@ -75,31 +75,6 @@ template <typename OS> OS &operator<<(OS &SS, Emit *E) {
   return SS;
 }
 
-template <typename OS, typename IterT, typename MapT>
-OS &join_out(OS &SS, IteratorRange<IterT> Range, std::string Sep, MapT Map) {
-  for (auto I = Range.begin(), E = Range.end(); I != E; ++I) {
-    if (I != Range.begin()) {
-      SS << Sep;
-    }
-    SS << Map(I);
-  }
-  return SS;
-}
-
-template <typename IterT>
-std::string join(IteratorRange<IterT> Range, std::string Sep = ",") {
-  std::stringstream SS;
-  join_out(SS, Range, Sep, [](IterT X) { return *X; });
-  return SS.str();
-}
-
-template <typename IterT, typename MapT>
-std::string join_map(IteratorRange<IterT> Range, std::string Sep, MapT Map) {
-  std::stringstream SS;
-  join_out(SS, Range, Sep, Map);
-  return SS.str();
-}
-
 } // namespace namecxx
 
 #endif // NAMEC_GENCXX_COMMON_H

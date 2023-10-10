@@ -60,11 +60,15 @@ class ArrayVarDecl : public VarDecl {
   std::vector<Expr *> Size;
 
 public:
+  using size_iterator = decltype(Size)::iterator;
   ArrayVarDecl(std::string Name, Type *Ty, std::vector<Expr *> Size)
       : VarDecl(Name, Ty), Size(Size) {}
   ArrayVarDecl(std::string Name, Type *Ty, std::vector<Expr *> Size, Expr *Init)
       : VarDecl(Name, Ty, Init), Size(Size) {}
   std::vector<Expr *> get_size() { return Size; }
+  IteratorRange<size_iterator> sizes() {
+    return IteratorRange<size_iterator>(Size.begin(), Size.end());
+  }
 
 protected:
   void emit_impl(std::ostream &SS) override;
