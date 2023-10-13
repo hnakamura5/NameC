@@ -6,22 +6,19 @@ void RawDirective::emit_impl(std::ostream &SS) { SS << get_val(); }
 
 void Include::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#include \"";
-  SS << get_path();
-  SS << "\"\n";
+  SS << "#include \"" << get_path() << "\"";
+  SS << "\n";
 }
 
 void SystemInclude::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#include <";
-  SS << get_path();
-  SS << ">\n";
+  SS << "#include <" << get_path() << ">";
+  SS << "\n";
 }
 
 void Define::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#define ";
-  SS << get_name();
+  SS << "#define " << get_name();
   if (!get_value().empty()) {
     SS << " ";
     SS << get_value();
@@ -30,38 +27,31 @@ void Define::emit_impl(std::ostream &SS) {
 }
 
 DefineFuncMacro::DefineFuncMacro(Context &C, std::string Name,
-                                 std::vector<std::string> Args)
-    : C(C), Name(Name), Args(Args) {
+                                 std::vector<std::string> Args, bool IsVarArg)
+    : C(C), Name(Name), Args(Args), IsVarArg(IsVarArg) {
   Body.reset(new MacroFuncScope(C));
 }
 
 void DefineFuncMacro::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#define ";
-  SS << get_name();
-  SS << "(";
-  for (auto I = 0; I < Args.size(); ++I) {
-    SS << Args[I];
-    if (I != Args.size() - 1) {
-      SS << ",";
-    }
+  SS << "#define " << get_name() << "(" << join(args());
+  if (is_vararg()) {
+    SS << ", ...";
   }
   SS << ") ";
-  get_body()->emit(SS);
+  SS << get_body();
   SS << "\n";
 }
 
 void Undef::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#undef ";
-  SS << get_name();
+  SS << "#undef " << get_name();
   SS << "\n";
 }
 
 void Pragma::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#pragma ";
-  SS << get_value();
+  SS << "#pragma " << get_value();
   SS << "\n";
 }
 
@@ -86,13 +76,11 @@ TopLevel *IfDirectiveBase::get_or_add_else() {
 void IfDirectiveBase::emit_impl(std::ostream &SS) {
   // Other part than #if, #ifdef, #ifndef
   SS << "\n";
-  get_then()->emit(SS);
+  SS << get_then();
   for (auto &[ElifCond, ElifThen] : Elifs) {
     SS << "\n";
-    SS << "#elif ";
-    ElifCond->emit(SS);
-    SS << "\n";
-    ElifThen->emit(SS);
+    SS << "#elif " << ElifCond << "\n";
+    SS << ElifThen;
   }
   SS << "\n";
   if (has_else()) {
@@ -108,21 +96,18 @@ IfDirective::IfDirective(Context &C, Expr *Cond)
 
 void IfDirective::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#if ";
-  get_cond()->emit(SS);
+  SS << "#if " << get_cond();
   IfDirectiveBase::emit_impl(SS);
 }
 
 void Ifdef::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#ifdef ";
-  SS << get_cond();
+  SS << "#ifdef " << get_cond();
   IfDirectiveBase::emit_impl(SS);
 }
 
 void Ifndef::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#ifndef ";
-  SS << get_cond();
+  SS << "#ifndef " << get_cond();
   IfDirectiveBase::emit_impl(SS);
 }

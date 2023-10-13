@@ -10,6 +10,7 @@ class Decl : public Emit {
 public:
   virtual ~Decl() = default;
   virtual void emit_impl(std::ostream &SS) = 0;
+  virtual std::string get_name() = 0;
 };
 
 class RawDecl : public Decl {
@@ -18,6 +19,7 @@ class RawDecl : public Decl {
 public:
   RawDecl(std::string Val) : Val(Val) {}
   std::string get_val() { return Val; }
+  std::string get_name() override { return Val; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -39,7 +41,7 @@ public:
   VarDecl(std::string Name, Type *Ty, Expr *Init)
       : Ty(Ty), Name(Name), Init(Init) {}
   Type *get_type() { return Ty; }
-  std::string get_name() { return Name; }
+  std::string get_name() override { return Name; }
   Expr *get_init() { return Init; }
   void set_const(bool IsConst) { this->IsConst = IsConst; }
   bool is_const() { return IsConst; }
@@ -80,12 +82,17 @@ class TypedefDecl : public Decl {
 public:
   TypedefDecl(TypeAlias *TA) : TA(TA) {}
   TypeAlias *get_type_alias() { return TA; }
+  std::string get_name() override;
 
 protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+class FuncSplitForwardDecl;
 class FuncDecl : public Decl {
+  friend class FuncSplitForwardDecl;
+
+protected:
   Context &C;
   Type *RetTy;
   std::string Name;
@@ -98,12 +105,16 @@ class FuncDecl : public Decl {
   bool IsStatic = false;
 
 public:
+  using param_iterator = decltype(Params)::iterator;
   FuncDecl(Context &C, std::string Name, Type *RetTy,
            std::vector<VarDecl *> Params, bool IsVarArg)
       : C(C), RetTy(RetTy), Name(Name), Params(Params), IsVarArg(IsVarArg) {}
   Type *get_ret_type() { return RetTy; }
-  std::string get_name() { return Name; }
+  std::string get_name() override { return Name; }
   std::vector<VarDecl *> get_params() { return Params; }
+  IteratorRange<param_iterator> params() {
+    return IteratorRange<param_iterator>(Params.begin(), Params.end());
+  }
   Scope *get_or_add_body();
   void set_extern(bool IsExtern) { this->IsExtern = IsExtern; }
   bool is_extern() { return IsExtern; }
@@ -111,6 +122,38 @@ public:
   bool is_static() { return IsStatic; }
   bool is_forward() { return !Body; }
   bool is_vararg() { return IsVarArg; }
+  virtual bool is_split_definition() { return false; }
+
+protected:
+  virtual void emit_impl_impl(std::ostream &SS, bool IsForward,
+                              bool IsSplitDefinition);
+  void emit_impl(std::ostream &SS) override;
+};
+
+class FuncSplitDecl : public FuncDecl {
+
+public:
+  FuncSplitDecl(Context &C, std::string Name, Type *RetTy,
+                std::vector<VarDecl *> Params, bool IsVarArg)
+      : FuncDecl(C, Name, RetTy, Params, IsVarArg) {
+    get_or_add_body();
+  }
+  bool is_split_definition() override { return true; }
+  bool get_body() { return get_or_add_body(); }
+
+protected:
+  void emit_impl(std::ostream &SS) override;
+};
+
+class FuncSplitForwardDecl : public Decl {
+
+protected:
+  FuncSplitDecl *FD;
+
+public:
+  FuncSplitForwardDecl(FuncSplitDecl *FD) : FD(FD) {}
+  FuncDecl *get_func_decl() { return FD; }
+  std::string get_name() override { return FD->get_name(); }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -123,7 +166,7 @@ class StructDecl : public Decl {
 public:
   StructDecl(Struct *S, bool IsForward) : S(S), IsForward(IsForward) {}
   Struct *get_struct() { return S; }
-  std::string get_name();
+  std::string get_name() override;
   bool is_forward() { return IsForward; }
 
 protected:
@@ -137,7 +180,7 @@ class UnionDecl : public Decl {
 public:
   UnionDecl(Union *U, bool IsForward) : U(U), IsForward(IsForward) {}
   Union *get_union() { return U; }
-  std::string get_name();
+  std::string get_name() override;
   bool is_forward() { return IsForward; }
 
 protected:
@@ -151,7 +194,7 @@ class EnumDecl : public Decl {
 public:
   EnumDecl(Enum *E, bool IsForward) : E(E), IsForward(IsForward) {}
   Enum *get_enum() { return E; }
-  std::string get_name();
+  std::string get_name() override;
   bool is_forward() { return IsForward; }
 
 protected:

@@ -17,15 +17,13 @@ void VarDecl::emit_impl(std::ostream &SS) {
   if (is_volatile()) {
     SS << "volatile ";
   }
-  get_type()->emit(SS);
-  SS << " ";
+  SS << get_type() << " ";
   if (is_restrict()) {
     SS << "restrict ";
   }
   SS << get_name();
   if (get_init()) {
-    SS << "=";
-    get_init()->emit(SS);
+    SS << "=" << get_init();
   }
 }
 
@@ -37,23 +35,21 @@ void ArrayVarDecl::emit_impl(std::ostream &SS) {
   }
 }
 
+std::string TypedefDecl::get_name() { return TA->get_name(); }
+
 void TypedefDecl::emit_impl(std::ostream &SS) {
   auto *T = get_type_alias()->get_type();
   SS << "typedef ";
   if (auto *FT = cast<Function>(T)) {
-    FT->get_ret_type()->emit(SS);
-    SS << " ";
-    SS << get_type_alias()->get_name();
-    SS << "(";
+    SS << FT->get_ret_type() << " " << get_type_alias()->get_name() << "(";
     for (auto P : FT->get_params()) {
       P->emit(SS);
-      SS << ", ";
+      SS << ",";
     }
     SS << ")";
   } else {
     T->emit(SS);
-    SS << " ";
-    SS << get_type_alias()->get_name();
+    SS << T << " " << get_type_alias()->get_name();
   }
 }
 
@@ -64,26 +60,31 @@ Scope *FuncDecl::get_or_add_body() {
   return Body;
 }
 
-void FuncDecl::emit_impl(std::ostream &SS) {
-  get_ret_type()->emit(SS);
-  SS << " ";
-  SS << get_name();
-  SS << "(";
-  for (auto I = 0; I < Params.size(); ++I) {
-    Params[I]->emit(SS);
-    if (I != Params.size() - 1) {
-      SS << ",";
-    }
-  }
+void FuncDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
+                              bool IsSplitDefinition) {
+  SS << get_ret_type() << " " << get_name() << "(" << join(params());
   if (is_vararg()) {
     SS << ",...";
   }
   SS << ")";
-  if (Body) {
-    SS << "{";
-    Body->emit(SS);
-    SS << "}";
+  if (!IsForward) {
+    SS << "{" << Body << "}";
+  } else {
+    // Forward declaration
+    SS << ";";
   }
+}
+
+void FuncDecl::emit_impl(std::ostream &SS) {
+  return emit_impl_impl(SS, !Body, false);
+}
+
+void FuncSplitForwardDecl::emit_impl(std::ostream &SS) {
+  FD->emit_impl_impl(SS, true, true);
+}
+
+void FuncSplitDecl::emit_impl(std::ostream &SS) {
+  emit_impl_impl(SS, false, true);
 }
 
 std::string StructDecl::get_name() { return S->get_name(); }

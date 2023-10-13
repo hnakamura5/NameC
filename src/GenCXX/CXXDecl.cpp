@@ -27,15 +27,13 @@ static void emit_type_qual(std::ostream &SS, VarDecl *D) {
 
 void VarDecl::emit_impl(std::ostream &SS) {
   emit_type_qual(SS, this);
-  SS << get_type();
-  SS << " ";
+  SS << get_type() << " ";
   if (is_restrict()) {
     SS << "restrict ";
   }
   SS << get_name_str();
   if (get_init()) {
-    SS << "=";
-    SS << get_init();
+    SS << "=" << get_init();
   }
 }
 
@@ -44,8 +42,7 @@ void ArrayVarDecl::emit_impl(std::ostream &SS) {
   SS << get_type() << " " << get_name_str();
   SS << "[" << join(sizes(), "][") << "]";
   if (get_init()) {
-    SS << "=";
-    SS << get_init();
+    SS << "=" << get_init();
   }
 }
 
@@ -65,28 +62,20 @@ void TypedefDecl::emit_impl(std::ostream &SS) {
   auto *T = get_type_alias()->get_type();
   SS << "typedef ";
   if (auto *FT = cast<Function>(T)) {
-    SS << FT->get_ret_type();
-    SS << " ";
-    SS << get_type_alias()->get_name_str();
-    SS << "(";
+    SS << FT->get_ret_type() << " " << get_type_alias()->get_name_str() << "(";
     for (auto P : FT->get_params()) {
-      SS << P;
-      SS << ", ";
+      SS << P << ",";
     }
     SS << ")";
   } else {
-    SS << T;
-    SS << " ";
-    SS << get_type_alias()->get_name_str();
+    SS << T << " " << get_type_alias()->get_name_str();
   }
 }
 
 QualName UsingDecl::get_name() { return TA->get_name_str(); }
 void UsingDecl::emit_impl(std::ostream &SS) {
-  SS << "using ";
-  SS << get_type_alias()->get_name_str();
-  SS << "=";
-  SS << get_type_alias()->get_type();
+  SS << "using " << get_type_alias()->get_name_str() << "="
+     << get_type_alias()->get_type();
 }
 
 FuncScope *FuncDecl::get_or_add_body() {
@@ -114,24 +103,13 @@ static void emit_func_qual(std::ostream &SS, FuncDecl *D) {
 void FuncDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
                               bool IsSplitDefinition) {
   emit_func_qual(SS, this);
-  SS << get_ret_type();
-  SS << " ";
-  SS << get_name_str();
-  SS << "(";
-  for (auto I = 0; I < Params.size(); ++I) {
-    SS << Params[I];
-    if (I != Params.size() - 1) {
-      SS << ",";
-    }
-  }
+  SS << get_ret_type() << " " << get_name_str() << "(" << join(params());
   if (is_vararg()) {
     SS << ",...";
   }
   SS << ")";
   if (!IsForward) {
-    SS << "{";
-    SS << Body;
-    SS << "}";
+    SS << "{" << Body << "}";
   } else {
     // Forward declaration
     SS << ";";
@@ -253,14 +231,7 @@ CtorDecl::CtorDecl(Context &C, QualName Name, std::vector<VarDecl *> Params,
 void CtorDecl::emit_impl_impl(std::ostream &SS, bool IsForward,
                               bool IsSplitDefinition) {
   emit_func_qual(SS, this);
-  SS << get_name().to_string();
-  SS << "(";
-  for (auto I = 0; I < Params.size(); ++I) {
-    SS << Params[I];
-    if (I != Params.size() - 1) {
-      SS << ",";
-    }
-  }
+  SS << get_name().to_string() << "(" << join(params());
   if (is_vararg()) {
     SS << ",...";
   }
@@ -304,13 +275,5 @@ void EnumDecl::emit_impl(std::ostream &SS) {
 }
 
 void TemplateDecl::emit_impl(std::ostream &SS) {
-  SS << "template<";
-  for (auto I = 0; I < Params.size(); ++I) {
-    SS << Params[I];
-    if (I != Params.size() - 1) {
-      SS << ",";
-    }
-  }
-  SS << "> ";
-  SS << D;
+  SS << "template<" << join(params()) << "> " /* <- space! */ << D;
 }

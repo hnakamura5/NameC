@@ -37,7 +37,8 @@ public:
   Define *def_macro_flag(std::string Name);
   Define *def_macro_value(std::string Name, std::string Value);
   DefineFuncMacro *def_macro_func(std::string Name,
-                                  std::vector<std::string> Params);
+                                  std::vector<std::string> Params,
+                                  bool IsVarArg = false);
   Undef *def_macro_undef(std::string Name);
   Pragma *pragma(std::string Value);
   IfDirective *directive_if(Expr *Cond);

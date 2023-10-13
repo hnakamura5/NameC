@@ -66,15 +66,18 @@ class DefineFuncMacro : public Directive {
   std::string Name;
   std::vector<std::string> Args;
   std::unique_ptr<MacroFuncScope> Body;
+  bool IsVarArg;
 
 public:
   using iterator = decltype(Args)::iterator;
-  DefineFuncMacro(Context &C, std::string Name, std::vector<std::string> Args);
+  DefineFuncMacro(Context &C, std::string Name, std::vector<std::string> Args,
+                  bool IsVarArg);
   std::string get_name() { return Name; }
   IteratorRange<iterator> args() {
     return IteratorRange<iterator>(Args.begin(), Args.end());
   }
   MacroFuncScope *get_body() { return Body.get(); }
+  bool is_vararg() { return IsVarArg; }
 
 protected:
   void emit_impl(std::ostream &SS) override;

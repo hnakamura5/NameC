@@ -7,66 +7,40 @@ void RawExpr::emit_impl(std::ostream &SS) { SS << get_val(); }
 void VariableExpr::emit_impl(std::ostream &SS) { SS << get_decl()->get_name(); }
 
 void SubscriptExpr::emit_impl(std::ostream &SS) {
-  get_array()->emit(SS);
-  SS << "[";
-  get_index()->emit(SS);
-  SS << "]";
+  SS << get_array() << "[" << get_index() << "]";
 }
 
 void CallExpr::emit_impl(std::ostream &SS) {
-  get_callee()->emit(SS);
-  SS << "(";
-  for (auto I = 0; I < Args.size(); ++I) {
-    Args[I]->emit(SS);
-    if (I != Args.size() - 1)
-      SS << ",";
-  }
-  SS << ")";
+  SS << get_callee() << "(" << join(args()) << ")";
 }
 
 void UnaryOp::emit_impl(std::ostream &SS) {
   if (IsPrefix) {
-    SS << Op;
-    Operand->emit(SS);
+    SS << Op << Operand;
   } else {
-    Operand->emit(SS);
-    SS << Op;
+    SS << Operand << Op;
   }
 }
 
-void BinaryOp::emit_impl(std::ostream &SS) {
-  LHS->emit(SS);
-  SS << Op;
-  RHS->emit(SS);
-}
+void BinaryOp::emit_impl(std::ostream &SS) { SS << LHS << Op << RHS; }
 
 void TernaryOp::emit_impl(std::ostream &SS) {
-  Cond->emit(SS);
-  SS << "?";
-  Then->emit(SS);
-  SS << ":";
-  Else->emit(SS);
+  SS << Cond << "?" << Then << ":" << Else;
 }
 
 void CastExpr::emit_impl(std::ostream &SS) {
-  SS << "(";
-  get_type()->emit(SS);
-  SS << ")";
-  get_operand()->emit(SS);
+  SS << "(" << get_type() << ")" << get_operand();
 }
 
 void ParenExpr::emit_impl(std::ostream &SS) {
-  SS << "(";
-  get_inside()->emit(SS);
-  SS << ")";
+  SS << "(" << get_inside() << ")";
 }
 
 void DesignatedInitExpr::emit_impl(std::ostream &SS) {
   SS << "{";
   for (auto I = 0; I < Designators.size(); ++I) {
     auto &[Name, E] = Designators[I];
-    SS << "." << Name << "=";
-    E->emit(SS);
+    SS << "." << Name << "=" << E;
     if (I != Designators.size() - 1) {
       SS << ",";
     }
@@ -75,29 +49,19 @@ void DesignatedInitExpr::emit_impl(std::ostream &SS) {
 }
 
 void InitListExpr::emit_impl(std::ostream &SS) {
-  SS << "{";
-  for (auto I = 0; I < Values.size(); ++I) {
-    Values[I]->emit(SS);
-    if (I != Values.size() - 1) {
-      SS << ",";
-    }
-  }
-  SS << "}";
+  SS << "{" << join(values()) << "}";
 }
 
 void GenericSelection::emit_impl(std::ostream &SS) {
-  SS << "_Generic(";
-  get_control()->emit(SS);
-  SS << ",";
+  SS << "_Generic(" << get_control() << ",";
   for (auto I = 0; I < AssocList.size(); ++I) {
     auto &[T, E] = AssocList[I];
     if (T) {
-      T->emit(SS);
-      SS << ":";
+      SS << T << ":";
     } else {
       SS << "default:";
     }
-    E->emit(SS);
+    SS << E;
     if (I != AssocList.size() - 1) {
       SS << ",";
     }

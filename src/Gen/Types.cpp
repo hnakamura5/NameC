@@ -20,37 +20,19 @@ void Named::emit_impl(std::ostream &SS) {
 
 void TypeAlias::emit_impl(std::ostream &SS) { SS << get_name(); }
 
-void Pointer::emit_impl(std::ostream &SS) {
-  get_elm_type()->emit(SS);
-  SS << "*";
-}
+void Pointer::emit_impl(std::ostream &SS) { SS << get_elm_type() << "*"; }
 
 void Array::emit_impl(std::ostream &SS) {
-  get_elm_type()->emit(SS);
-  SS << "[";
-  for (auto I = 0; I < get_size().size(); ++I) {
-    get_size()[I]->emit(SS);
-    if (I != get_size().size() - 1)
-      SS << "][";
-  }
-  SS << "]";
+  SS << get_elm_type() << "[" << join(sizes(), "][") << "]";
 }
 
 void Function::emit_impl(std::ostream &SS) {
   get_ret_type()->emit(SS);
-  SS << "(";
-  for (auto I = 0; I < get_params().size(); ++I) {
-    get_params()[I]->emit(SS);
-    if (I != get_params().size() - 1)
-      SS << ",";
-  }
-  SS << ")";
+  SS << "(" << join(params(), ",") << ")";
 }
 
 void Struct::emit_impl(std::ostream &SS) {
-  SS << "struct ";
-  SS << get_name();
-  SS << "{";
+  SS << "struct " << get_name() << "{";
   for (auto &M : members()) {
     M.emit(SS);
     SS << ";";
@@ -59,9 +41,7 @@ void Struct::emit_impl(std::ostream &SS) {
 }
 
 void Union::emit_impl(std::ostream &SS) {
-  SS << "union ";
-  SS << get_name();
-  SS << "{";
+  SS << "union " << get_name() << "{";
   for (auto &M : members()) {
     M.emit(SS);
     SS << ";";
@@ -70,13 +50,9 @@ void Union::emit_impl(std::ostream &SS) {
 }
 
 void Enum::emit_impl(std::ostream &SS) {
-  SS << "enum ";
-  SS << get_name();
-  SS << "{";
+  SS << "enum " << get_name() << "{";
   for (auto &M : members()) {
-    SS << M.first << "=";
-    M.second->emit(SS);
-    SS << ",";
+    SS << M.first << "=" << M.second << ",";
   }
   SS << "}";
 }

@@ -49,13 +49,10 @@ void Class::emit_impl(std::ostream &SS) {
   }
   if (base_size() > 0) {
     SS << " : ";
-    for (auto I = 0; I < base_size(); ++I) {
-      auto &[Access, Base] = Bases[I];
-      SS << Access.get_name() << " " << Base;
-      if (I != base_size() - 1) {
-        SS << ",";
-      }
-    }
+    SS << join_map(bases(), ",", [](auto Base) {
+      auto &[Access, BaseTy] = *Base;
+      return Access.get_name() + " " + BaseTy->to_string();
+    });
   }
   ClassOrUnion::emit_impl(SS);
 }
@@ -68,9 +65,7 @@ void Union::emit_impl(std::ostream &SS) {
 void Enum::emit_impl(std::ostream &SS) {
   SS << "enum " << get_name_str() << "{";
   for (auto &M : members()) {
-    SS << M.first.to_string() << "=";
-    SS << M.second;
-    SS << ",";
+    SS << M.first.to_string() << "=" << M.second << ",";
   }
   SS << "}";
 }

@@ -24,10 +24,9 @@ Define *DirectiveDefineMixin::def_macro_value(std::string Name,
   return add(new Define(Name, Value));
 }
 
-DefineFuncMacro *
-DirectiveDefineMixin::def_macro_func(std::string Name,
-                                     std::vector<std::string> Params) {
-  return add(new DefineFuncMacro(C, Name, Params));
+DefineFuncMacro *DirectiveDefineMixin::def_macro_func(
+    std::string Name, std::vector<std::string> Params, bool IsVarArg) {
+  return add(new DefineFuncMacro(C, Name, Params, IsVarArg));
 }
 
 Undef *DirectiveDefineMixin::def_macro_undef(std::string Name) {

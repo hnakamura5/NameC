@@ -54,9 +54,13 @@ class CallExpr : public Expr {
   std::vector<Expr *> Args;
 
 public:
+  using iterator = decltype(Args)::iterator;
   CallExpr(Expr *Callee, std::vector<Expr *> Args)
       : Callee(Callee), Args(Args) {}
   Expr *get_callee() { return Callee; }
+  IteratorRange<iterator> args() {
+    return IteratorRange<iterator>(Args.begin(), Args.end());
+  }
   std::vector<Expr *> get_args() { return Args; }
 
 protected:

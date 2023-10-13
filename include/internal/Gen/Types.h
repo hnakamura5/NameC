@@ -70,9 +70,13 @@ class Array : public Type {
   std::vector<Expr *> Size;
 
 public:
+  using iterator = decltype(Size)::iterator;
   Array(Type *ElmTy, std::vector<Expr *> Size) : ElmTy(ElmTy), Size(Size) {}
   Type *get_elm_type() { return ElmTy; }
   std::vector<Expr *> get_size() { return Size; }
+  IteratorRange<iterator> sizes() {
+    return IteratorRange<iterator>(Size.begin(), Size.end());
+  }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -84,10 +88,14 @@ class Function : public Type {
   bool IsVarArg;
 
 public:
+  using param_iterator = decltype(Params)::iterator;
   Function(Type *RetTy, std::vector<Type *> Params, bool IsVarArg)
       : RetTy(RetTy), Params(Params), IsVarArg(IsVarArg) {}
   Type *get_ret_type() { return RetTy; }
   std::vector<Type *> get_params() { return Params; }
+  IteratorRange<param_iterator> params() {
+    return IteratorRange<param_iterator>(Params.begin(), Params.end());
+  }
   bool is_vararg() { return IsVarArg; }
 
 protected:

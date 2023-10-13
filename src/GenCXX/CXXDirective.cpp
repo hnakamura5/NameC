@@ -26,14 +26,18 @@ void Define::emit_impl(std::ostream &SS) {
 }
 
 DefineFuncMacro::DefineFuncMacro(Context &C, std::string Name,
-                                 std::vector<std::string> Args)
-    : C(C), Name(Name), Args(Args) {
+                                 std::vector<std::string> Args, bool IsVarArg)
+    : C(C), Name(Name), Args(Args), IsVarArg(IsVarArg) {
   Body.reset(new MacroFuncScope(C));
 }
 
 void DefineFuncMacro::emit_impl(std::ostream &SS) {
   SS << "\n";
-  SS << "#define " << get_name() << "(" << join(args()) << ") ";
+  SS << "#define " << get_name() << "(" << join(args());
+  if (is_vararg()) {
+    SS << ", ...";
+  }
+  SS << ") ";
   SS << get_body();
   SS << "\n";
 }

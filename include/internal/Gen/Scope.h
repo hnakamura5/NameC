@@ -26,6 +26,10 @@ public:
   // Only in top level we can define/declare functions
   FuncDecl *def_func(std::string Name, Type *RetTy,
                      std::vector<VarDecl *> Params, bool IsVarArg = false);
+  FuncSplitDecl *def_func_declare(std::string Name, Type *RetTy,
+                                  std::vector<VarDecl *> Params,
+                                  bool IsVarArg = false);
+  void def_func_define(FuncSplitDecl *Decl);
 
 protected:
   void emit_impl(std::ostream &SS) override;

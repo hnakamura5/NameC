@@ -4,85 +4,53 @@ using namespace namec;
 
 void RawStmt::emit_impl(std::ostream &SS) { SS << get_val(); }
 
-void DeclStmt::emit_impl(std::ostream &SS) {
-  get_decl()->emit(SS);
-  SS << ";";
-}
+void DeclStmt::emit_impl(std::ostream &SS) { SS << get_decl() << ";"; }
 
 void IfStmt::emit_impl(std::ostream &SS) {
-  SS << "if(";
-  get_cond()->emit(SS);
-  SS << "){";
-  get_then()->emit(SS);
-  SS << "}";
+  SS << "if(" << get_cond() << "){" << get_then() << "}";
   for (auto &[ECond, EBody] : Elseifs) {
-    SS << "else if(";
-    ECond->emit(SS);
-    SS << "){";
-    EBody->emit(SS);
-    SS << "}";
+    SS << "else if(" << ECond << "){" << EBody << "}";
   }
   if (has_else()) {
-    SS << "else{";
-    Else->emit(SS);
-    SS << "}";
+    SS << "else{" << Else << "}";
   }
 }
 
 void WhileStmt::emit_impl(std::ostream &SS) {
-  SS << "while(";
-  get_cond()->emit(SS);
-  SS << "){";
-  get_body()->emit(SS);
-  SS << "}";
+  SS << "while(" << get_cond() << "){" << get_body() << "}";
 }
 
 void ForStmt::emit_impl(std::ostream &SS) {
   SS << "for(";
   if (get_init()) {
-    get_init()->emit(SS);
+    SS << get_init();
     // Here Init Stmt is VarStmt or ExprStmt. Semicolon is emitted by it.
   } else {
     SS << ";";
   }
   if (get_cond()) {
-    get_cond()->emit(SS);
-    SS << ";";
+    SS << get_cond() << ";";
   } else {
     SS << ";";
   }
   if (get_step()) {
     get_step()->emit(SS);
   }
-  SS << "){";
-  get_body()->emit(SS);
-  SS << "}";
+  SS << "){" << get_body() << "}";
 }
 
 void DoStmt::emit_impl(std::ostream &SS) {
-  SS << "do{";
-  get_body()->emit(SS);
-  SS << "}while(";
-  get_cond()->emit(SS);
-  SS << ")";
+  SS << "do{" << get_body() << "}while(" << get_cond() << ")";
 }
 
-void BlockStmt::emit_impl(std::ostream &SS) {
-  SS << "{";
-  get_scope()->emit(SS);
-  SS << "}";
-}
+void BlockStmt::emit_impl(std::ostream &SS) { SS << "{" << get_scope() << "}"; }
 
-void ExprStmt::emit_impl(std::ostream &SS) {
-  get_expr()->emit(SS);
-  SS << ";";
-}
+void ExprStmt::emit_impl(std::ostream &SS) { SS << get_expr() << ";"; }
 
 void ReturnStmt::emit_impl(std::ostream &SS) {
   SS << "return";
   if (get_expr()) {
-    SS << " ";
-    get_expr()->emit(SS);
+    SS << " " << get_expr();
   }
   SS << ";";
 }
@@ -94,7 +62,7 @@ void ContinueStmt::emit_impl(std::ostream &SS) { SS << "continue;"; }
 void LabelStmt::emit_impl(std::ostream &SS) {
   SS << get_name() << ":";
   if (get_stmt()) {
-    get_stmt()->emit(SS);
+    SS << get_stmt();
   } else {
     SS << ";";
   }
@@ -106,13 +74,11 @@ void GotoStmt::emit_impl(std::ostream &SS) {
 
 void CaseStmt::emit_impl(std::ostream &SS) {
   if (get_val()) {
-    SS << "case ";
-    get_val()->emit(SS);
-    SS << ":";
+    SS << "case " << get_val() << ":";
   } else {
     SS << "default:";
   }
-  get_body()->emit(SS);
+  SS << get_body();
   if (!IsFallThrough) {
     SS << "break;";
   }
@@ -133,9 +99,7 @@ CaseStmt *SwitchStmt::add_default(bool IsFallThrough) {
 }
 
 void SwitchStmt::emit_impl(std::ostream &SS) {
-  SS << "switch(";
-  get_cond()->emit(SS);
-  SS << "){";
+  SS << "switch(" << get_cond() << "){";
   for (auto &C : Cases) {
     C->emit(SS);
   }

@@ -70,6 +70,14 @@ private:
                       std::vector<VarDecl *> Params, bool IsVarArgs = false) {
     return add_decl(new FuncDecl(*this, Name, RetTy, Params, IsVarArgs));
   }
+  FuncSplitDecl *decl_func_split(std::string Name, Type *RetTy,
+                                 std::vector<VarDecl *> Params,
+                                 bool IsVarArgs = false) {
+    return add_decl(new FuncSplitDecl(*this, Name, RetTy, Params, IsVarArgs));
+  }
+  FuncSplitForwardDecl *decl_func_split_forward(FuncSplitDecl *FD) {
+    return add_decl(new FuncSplitForwardDecl(FD));
+  }
   StructDecl *decl_struct(Struct *S, bool IsForward = false) {
     return add_decl(new StructDecl(S, IsForward));
   }

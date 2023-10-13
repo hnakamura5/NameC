@@ -54,7 +54,7 @@ TEST(DirectiveTest, DefineTest) {
 
 TEST(DirectiveTest, DefineFuncTest) {
   TopLevel F(C);
-  auto *R = F.def_macro_func("macro", {"arg1", "arg2"});
+  auto *R = F.def_macro_func("macro", {"arg1", "arg2"}, false);
   auto *Body = R->get_body();
   Body->stmt_raw("raw_body_directive1;");
   Body->stmt_raw("raw_body_directive2;");
