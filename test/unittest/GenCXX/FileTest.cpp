@@ -53,6 +53,17 @@ TEST(FileTest, VarArgFunc) {
                            "}\n\n");
 }
 
+TEST(FileTest, SplitFunc) {
+  CXXFile F(C);
+  auto *T = F.get_first_top_level();
+  auto *X = C.decl_var("x", C.type_int());
+  auto *Func1 = T->def_func_declare("func1", C.type_int(), {X});
+  Func1->get_body()->stmt_return(C.expr_var(X));
+  T->def_func_define(Func1);
+  EXPECT_EQ(F.to_string(), "int func1(int x);\n"
+                           "int func1(int x){return x;}\n\n");
+}
+
 TEST(FileTest, TemplateInstantiations) {
   CXXFile F(C);
   auto *T = F.get_first_top_level();

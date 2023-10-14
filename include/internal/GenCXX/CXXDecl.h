@@ -186,7 +186,7 @@ public:
     get_or_add_body();
   }
   bool is_split_definition() override { return true; }
-  bool get_body() { return get_or_add_body(); }
+  FuncScope *get_body() { return get_or_add_body(); }
 
 protected:
   void emit_impl(std::ostream &SS) override;

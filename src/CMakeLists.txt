@@ -1,6 +1,6 @@
-add_library(NameC_Gen STATIC)
+add_library(NameC STATIC)
 
-target_sources(NameC_Gen PRIVATE
+target_sources(NameC PRIVATE
     Gen.cpp
     Gen/Exprs.cpp
     Gen/Stmts.cpp
@@ -25,6 +25,6 @@ target_sources(NameC_Gen PRIVATE
     GenCXX/CXXCommon.cpp
 )
 
-target_link_libraries(NameC_Gen PRIVATE basic_configs)
+target_link_libraries(NameC PRIVATE basic_configs)
 
-install(TARGETS NameC_Gen RUNTIME)
+install(TARGETS NameC RUNTIME)
