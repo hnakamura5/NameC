@@ -17,11 +17,15 @@ void VarDecl::emit_impl(std::ostream &SS) {
   if (is_volatile()) {
     SS << "volatile ";
   }
-  SS << get_type() << " ";
+  SS << get_type();
+  auto Name = get_name();
+  if (Name.size() > 0) {
+    SS << " ";
+  }
   if (is_restrict()) {
     SS << "restrict ";
   }
-  SS << get_name();
+  SS << Name;
   if (get_init()) {
     SS << "=" << get_init();
   }

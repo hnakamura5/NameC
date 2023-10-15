@@ -27,11 +27,15 @@ static void emit_type_qual(std::ostream &SS, VarDecl *D) {
 
 void VarDecl::emit_impl(std::ostream &SS) {
   emit_type_qual(SS, this);
-  SS << get_type() << " ";
+  SS << get_type();
+  auto Name = get_name_str();
+  if (Name.size() > 0) {
+    SS << " ";
+  }
   if (is_restrict()) {
     SS << "restrict ";
   }
-  SS << get_name_str();
+  SS << Name;
   if (get_init()) {
     SS << "=" << get_init();
   }

@@ -9,11 +9,8 @@ if (DOXYGEN_FOUND)
   set(DOXYGEN_STRIP_FROM_PATH "${PROJECT_SOURCE_DIR}")
   set(DOXYGEN_STRIP_FROM_INC_PATH "${PROJECT_SOURCE_DIR}")
   set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${PROJECT_SOURCE_DIR}/README.md")
-# We do not require graph
-  #set(DOXYGEN_HAVE_DOT "NO")
-  #set(DOXYGEN_CALL_GRAPH "NO")
-  #set(DOXYGEN_CALLER_GRAPH "NO")
-  #set(DOXYGEN_EXTRACT_ALL "NO")
+  set(DOXYGEN_LAYOUT_FILE "${PROJECT_SOURCE_DIR}/doc/DoxygenLayout.xml")
+  set(DOXYGEN_GENERATE_TREEVIEW "YES")
 
   doxygen_add_docs(doxygen_doc
       "${PROJECT_SOURCE_DIR}/README.md"
@@ -28,4 +25,3 @@ if (DOXYGEN_FOUND)
 else()
   message(WARNING "Doxygen not found, skip generating document.")
 endif()
-

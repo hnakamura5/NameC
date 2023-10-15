@@ -2,12 +2,6 @@
 
 using namespace namec;
 
-/// @brief
-/// @param Name
-/// @param RetTy
-/// @param Params
-/// @param IsVarArg
-/// @return
 FuncDecl *TopLevel::def_func(std::string Name, Type *RetTy,
                              std::vector<VarDecl *> Params, bool IsVarArg) {
   auto *F = C.decl_func(Name, RetTy, Params, IsVarArg);

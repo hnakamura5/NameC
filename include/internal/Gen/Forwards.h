@@ -14,9 +14,6 @@
 
 using namespace namec_util;
 
-/**
- @brief namec is for C code generation.
- */
 namespace namec {
 class CFile;
 class Context;
