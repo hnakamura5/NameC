@@ -4,7 +4,7 @@
 
 /**
   @brief namec is for C code generation.
-  @note
+
   ## Examples
   Some examples here. For more examples, visit the source code and see the
   tests.

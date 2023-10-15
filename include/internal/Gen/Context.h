@@ -9,9 +9,40 @@
 namespace namec {
 class UbiquitousDeclStmtMixin;
 
-// Context manage Scope, Decl and Expr heap existence. Stmt are kept in Scope.
-// This also exists to eliminate complex circular dependency between Scope,
-// Decl, Stmt and Expr.
+/**
+  @brief Context is global heap manager, and also a factory for types and
+  expressions.
+
+  This create and holds ownership of types and expressions used independently
+  from the specific location in TopLevel or Scopes. Stmt are kept in Scopes.
+
+  In the viewpoint of Implementation, this also exists to eliminate complex
+  circular dependency between Scope, Decl, Stmt and Expr.
+
+  ## Examples
+  Let C be a Context object.
+
+  ### Binary Operation
+  ```cpp
+  int i1 = 1;
+  int i2 = 2;
+  Expr *E = C.expr_binary("+", C.expr_int(i1), C.expr_int(i2));
+  ex *E = C.ex_binary("+", C.ex_int(i1), C.ex_int(i2));
+  ```
+  then E can be used as the expression passed to statements of,
+  ```c
+  1 + 2
+  ```
+
+  ### Cast Expression
+  ```cpp
+  Expr *E = C.expr_cast(C.type_ptr(C.type_int()), C.expr_addr(C.expr_raw("x")));
+  ```
+  then E is,
+  ```c
+  (int *) &x
+  ```
+ */
 class Context {
   friend class CFile;
   friend class Scope;

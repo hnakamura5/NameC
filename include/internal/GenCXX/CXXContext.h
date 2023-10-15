@@ -175,6 +175,7 @@ private:
   CtorSplitForwardDecl *decl_ctor_split_forward(CtorSplitDecl *CD) {
     return add_decl(new CtorSplitForwardDecl(CD));
   }
+
   MethodTemplateDecl *
   decl_method_template(QualName Name, std::vector<VarDecl *> TemplateParams,
                        Type *RetTy, std::vector<VarDecl *> Params,
