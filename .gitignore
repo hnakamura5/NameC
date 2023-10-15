@@ -42,11 +42,11 @@
 /.vs
 /.vscode
 
-# test directories
-
+# sandbox directories
 /test/sandbox/
-
-doc
+/doc/sandbox/
+/src/sandbox/
+/include/sandbox/
 out
 
 CMakeSettings.json

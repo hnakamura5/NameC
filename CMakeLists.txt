@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.25)
 
 project(NameC C CXX)
 
@@ -10,3 +10,12 @@ target_include_directories(basic_configs INTERFACE
 
 add_subdirectory(src)
 add_subdirectory(test)
+
+install(TARGETS NameC RUNTIME
+        DESTINATION "bin")
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h")
+
+add_subdirectory(doc)

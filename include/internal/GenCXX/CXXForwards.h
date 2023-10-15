@@ -15,6 +15,9 @@
 
 using namespace namec_util;
 
+/**
+ @brief namecxx is for C++ code generation.
+ */
 namespace namecxx {
 class CXXFile;
 class Context;

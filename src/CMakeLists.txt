@@ -27,4 +27,3 @@ target_sources(NameC PRIVATE
 
 target_link_libraries(NameC PRIVATE basic_configs)
 
-install(TARGETS NameC RUNTIME)
