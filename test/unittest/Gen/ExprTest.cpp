@@ -89,3 +89,23 @@ TEST(ExprTest, GenericSelectionTest) {
   Gen->add_default(C.expr_int(4));
   EXPECT_EQ(Gen->to_string(), "_Generic(1,int:2,char:3,default:4)");
 }
+
+// Short form tests.
+TEST(ExprTest, ShortFormLiteralTest) {
+  EXPECT_EQ(C.EX(1)->to_string(), "1");
+  EXPECT_EQ(C.EX(C.EX(1))->to_string(), "(1)");
+  EXPECT_EQ(C.EX(2.0f)->to_string(), "2.000000f");
+  EXPECT_EQ(C.EX(2.0)->to_string(), "2.000000");
+  EXPECT_EQ(C.EX('x')->to_string(), "'x'");
+  EXPECT_EQ(C.EX("var")->to_string(), "var");
+  EXPECT_EQ(C.STR("str")->to_string(), "\"str\"");
+  EXPECT_EQ(C.EX(true)->to_string(), "1");
+  EXPECT_EQ(C.EX(nullptr)->to_string(), "((void*)0)");
+}
+
+TEST(ExprTest, ShortFormExpressionTest) {
+  EXPECT_EQ(C.EX("!", false)->to_string(), "(!0)");
+  EXPECT_EQ(C.EX("x", "+", 1)->to_string(), "(x+1)");
+  EXPECT_EQ(C.CALL("func", 1, 2)->to_string(), "(func(1,2))");
+  EXPECT_EQ(C.IDX("arr", 0, 1)->to_string(), "(arr[0][1])");
+}

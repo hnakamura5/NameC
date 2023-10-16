@@ -27,7 +27,7 @@ void TopLevel::emit_impl(std::ostream &SS) {
   }
 }
 
-void Scope::emit_impl(std::ostream &SS) {
+void FuncScope::emit_impl(std::ostream &SS) {
   for (auto *E : Entries) {
     SS << E;
   }

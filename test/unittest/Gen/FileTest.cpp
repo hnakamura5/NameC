@@ -13,7 +13,7 @@ TEST(FileTest, FileOutPut) {
   TopLevel *T = F.get_first_top_level();
   FuncDecl *Main =
       T->def_func("main", C.type_int(), {C.decl_var("", C.type_void())});
-  Scope *S = Main->get_or_add_body();
+  FuncScope *S = Main->get_or_add_body();
   S->stmt_return(C.expr_int(0));
   EXPECT_EQ(F.to_string(), "int main(void){return 0;}\n\n");
   std::filesystem::path P = "test.c";

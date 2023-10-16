@@ -16,7 +16,14 @@ class UbiquitousDeclStmtMixin;
 // Context manage Scope, Decl and Expr heap existence. Stmt are kept in Scope.
 // This also exists to eliminate complex circular dependency between Scope,
 // Decl, Stmt and Expr.
-class Context {
+class Context
+    : public LiteralExprAPIMixin<Context, Expr, RawExpr>,
+      public CommonBasicExprAPIMixin<Context, Expr, UnaryOp, BinaryOp,
+                                     TernaryOp, SubscriptExpr, CallExpr,
+                                     CastExpr, ParenExpr, Type>,
+      public ShortFormExprAPIMixin<Context, Expr, UnaryOp, BinaryOp, CallExpr,
+                                   Type, VarDecl, QualName>,
+      public BuiltinTypeAPIMixin<Context, Type, RawType, Void> {
   friend class CFile;
   friend class FuncScope;
   friend class TopLevel;
@@ -54,17 +61,15 @@ class Context {
     return Ty;
   }
 
-  RawType *get_or_add_raw_type(std::string Val) {
-    if (auto P = RawTypeMap.find(Val); P != RawTypeMap.end()) {
-      return P->second;
-    }
-    auto *Ty = add_type(new RawType(Val));
-    RawTypeMap[Val] = Ty;
-    return Ty;
-  }
+protected:
+  void on_add_raw_expr(Expr *E) override { add_expr(E); }
+  void on_add_expr(Expr *E) override { add_expr(E); }
+  void on_add_type(Type *T) override { add_type(T); }
 
 public:
-  Context() { VoidSingleton.reset(new Void()); }
+  Context()
+      : LiteralExprAPIMixin(*this), CommonBasicExprAPIMixin(*this),
+        ShortFormExprAPIMixin(*this), BuiltinTypeAPIMixin(*this) {}
   ~Context(){};
 
   FuncScope *add_func_scope();
@@ -221,70 +226,21 @@ public:
   }
 
   QualName qual_name(std::vector<std::string> Name) { return QualName(Name); }
-  // Super shortcut API for qual_name used as construction and concatenation.
-  // Accept string, QualName and Decl.
-  template <typename... T> QualName QN(T... Names) {
-    return qual_name(qn_impl(Names...));
-  }
 
-  RawExpr *expr_raw(std::string Val) { return add_expr(new RawExpr(Val)); }
   RawExpr *expr_true() { return expr_raw("true"); }
   RawExpr *expr_false() { return expr_raw("false"); }
-  RawExpr *expr_int(int Val) { return expr_raw(std::to_string(Val)); }
-  RawExpr *expr_uint(unsigned int Val) {
-    return expr_raw(std::to_string(Val) + "u");
-  }
-  RawExpr *expr_long(long Val) { return expr_raw(std::to_string(Val) + "l"); }
-  RawExpr *expr_ulong(unsigned long Val) {
-    return expr_raw(std::to_string(Val) + "ul");
-  }
-  RawExpr *expr_llong(long long Val) {
-    return expr_raw(std::to_string(Val) + "ll");
-  }
-  RawExpr *expr_ullong(unsigned long long Val) {
-    return expr_raw(std::to_string(Val) + "ull");
-  }
-  RawExpr *expr_float(float Val) { return expr_raw(std::to_string(Val) + "f"); }
-  RawExpr *expr_double(float Val) { return expr_raw(std::to_string(Val)); }
-  RawExpr *expr_char(char Val) {
-    return expr_raw(std::string("'") + Val + "'");
-  }
-  RawExpr *expr_str(std::string Val) { return expr_raw("\"" + Val + "\""); }
+
+  RawExpr *expr_nullptr() { return expr_raw("nullptr"); }
   VariableExpr *expr_var(VarDecl *D) { return add_expr(new VariableExpr(D)); }
   RawExpr *expr_var_name(QualName Name) { return expr_raw(Name.to_string()); }
-  SubscriptExpr *expr_subscr(Expr *Base, Expr *Index) {
-    return add_expr(new SubscriptExpr(Base, Index));
-  }
-  CallExpr *expr_call(Expr *Callee, std::vector<Expr *> Args) {
-    return add_expr(new CallExpr(Callee, Args));
-  }
-  // prefix type unary operation
-  UnaryOp *expr_pre_unary(std::string Op, Expr *E) {
-    return add_expr(new UnaryOp(Op, E, true));
-  }
-  // postfix type unary operation (post increment/decrement)
-  UnaryOp *expr_post_unary(std::string Op, Expr *E) {
-    return add_expr(new UnaryOp(Op, E, false));
-  }
-  BinaryOp *expr_binary(std::string Op, Expr *LHS, Expr *RHS) {
-    return add_expr(new BinaryOp(Op, LHS, RHS));
-  }
-  TernaryOp *expr_ternary(Expr *Cond, Expr *LHS, Expr *RHS) {
-    return add_expr(new TernaryOp(Cond, LHS, RHS));
-  }
-  CastExpr *expr_cast(Type *Ty, Expr *E) {
-    return add_expr(new CastExpr(Ty, E));
-  }
-  ParenExpr *expr_paren(Expr *E) { return add_expr(new ParenExpr(E)); }
+
   InitListExpr *expr_init_list(std::vector<Expr *> Values) {
     return add_expr(new InitListExpr(Values));
   }
-  CallExpr *expr_va_arg(Expr *VaList, Type *T) {
-    return expr_call(expr_var_name("va_arg"), {VaList, expr_type(T)});
+  Expr *expr_qual_name(QualName Name) {
+    return add_expr(new QualNameExpr(Name));
   }
-  CallExpr *expr_sizeof(Type *T) {
-    return expr_call(expr_var_name("sizeof"), {expr_type(T)});
-  }
+
   // C++ specific.
   RawExpr *expr_type(Type *T) { return expr_raw(T->to_string()); }
   QualNameExpr *expr_qual_name(std::vector<std::string> Name) {
@@ -308,9 +264,6 @@ public:
   UserDefinedLiteral *expr_user_defined_literal(Expr *E, std::string Postfix) {
     return add_expr(new UserDefinedLiteral(E, Postfix));
   }
-  QualNameExpr *expr_qual_name(QualName Name) {
-    return add_expr(new QualNameExpr(Name));
-  }
   InstantiateExpr *expr_instantiate(TemplateDecl *TD,
                                     std::vector<TypeOrExpr *> Args) {
     return add_expr(new InstantiateExpr(TD, Args));
@@ -326,50 +279,22 @@ public:
     return add_expr(new FoldExpr(Op, Pack, Init, IsLeftFold));
   }
 
-  // handy expr APIs
-  UnaryOp *expr_addr(Expr *E) { return expr_pre_unary("&", E); }
-  UnaryOp *expr_deref(Expr *E) { return expr_pre_unary("*", E); }
-  UnaryOp *expr_not(Expr *E) { return expr_pre_unary("!", E); }
-  BinaryOp *expr_dot(Expr *LHS, QualName RHS) {
-    return expr_binary(".", LHS, expr_qual_name(RHS));
+  // Short form factory methods
+  template <typename... T> QualName QN(T... Names) {
+    return qual_name(qn_impl(Names...));
   }
-  BinaryOp *expr_arrow(Expr *LHS, QualName RHS) {
-    return expr_binary("->", LHS, expr_qual_name(RHS));
-  }
-  BinaryOp *expr_eq(Expr *LHS, Expr *RHS) {
-    return expr_binary("==", LHS, RHS);
-  }
-  BinaryOp *expr_lt(Expr *LHS, Expr *RHS) { return expr_binary("<", LHS, RHS); }
-  BinaryOp *expr_gt(Expr *LHS, Expr *RHS) { return expr_binary(">", LHS, RHS); }
-  BinaryOp *expr_leq(Expr *LHS, Expr *RHS) {
-    return expr_binary("<=", LHS, RHS);
-  }
-  BinaryOp *expr_geq(Expr *LHS, Expr *RHS) {
-    return expr_binary(">=", LHS, RHS);
+  Expr *EX(QualName Name) { return expr_qual_name(Name); }
+  Expr *EX(TemplateDecl *TD, std::vector<TypeOrExpr *> Args) {
+    return expr_instantiate(TD, Args);
   }
 
   // Type factory APIs
 public:
-  RawType *type_raw(std::string Val) { return add_type(new RawType(Val)); }
-  Named *type_var(VarDecl *D) { return type_name(D); }
-  RawType *type_auto() { return get_or_add_raw_type("auto"); }
-  RawType *type_char() { return get_or_add_raw_type("char"); }
-  RawType *type_uchar() { return get_or_add_raw_type("unsigned char"); }
-  RawType *type_short() { return get_or_add_raw_type("short"); }
-  RawType *type_ushort() { return get_or_add_raw_type("unsigned short"); }
-  RawType *type_int() { return get_or_add_raw_type("int"); }
-  RawType *type_uint() { return get_or_add_raw_type("unsigned int"); }
-  RawType *type_long() { return get_or_add_raw_type("long"); }
-  RawType *type_ulong() { return get_or_add_raw_type("unsigned long"); }
-  RawType *type_llong() { return get_or_add_raw_type("long long"); }
-  RawType *type_ullong() { return get_or_add_raw_type("unsigned long long"); }
-  RawType *type_float() { return get_or_add_raw_type("float"); }
-  RawType *type_double() { return get_or_add_raw_type("double"); }
-  Void *type_void() { return VoidSingleton.get(); }
   TypeAlias *type_typedef(QualName Name, Type *Ty) {
     return add_type(new TypeAlias(Name, Ty));
   }
 
+  Named *type_var(VarDecl *D) { return type_name(D); }
   Named *type_name(Decl *D) {
     if (auto P = NamedTypeMap.find(D); P != NamedTypeMap.end()) {
       return P->second;
@@ -406,7 +331,6 @@ public:
                       bool IsVarArgs = false) {
     return add_type(new Function(RetTy, Params, IsVarArgs));
   }
-  Type *type_va_list() { return get_or_add_raw_type("va_list"); }
 
   // C++ specific.
   Class *type_class(QualName Name,

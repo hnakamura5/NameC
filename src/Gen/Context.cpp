@@ -2,8 +2,8 @@
 
 using namespace namec;
 
-Scope *Context::add_scope() {
-  Scope *S = new Scope(*this);
-  Scopes.push_back(std::unique_ptr<Scope>(S));
+FuncScope *Context::add_scope() {
+  FuncScope *S = new FuncScope(*this);
+  Scopes.push_back(std::unique_ptr<FuncScope>(S));
   return S;
 }

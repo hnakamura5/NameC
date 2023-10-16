@@ -4,7 +4,7 @@
 using namespace namec;
 
 Context C;
-Scope S(C);
+FuncScope S(C);
 
 TEST(DirectiveTest, RawDirectiveTest) {
   TopLevel F(C);

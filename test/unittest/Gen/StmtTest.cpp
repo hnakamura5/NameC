@@ -4,7 +4,7 @@
 using namespace namec;
 
 Context C;
-Scope S(C);
+FuncScope S(C);
 
 TEST(StmtTest, RawStmtTest) {
   auto *R = S.stmt_raw("raw_stmt");
@@ -49,7 +49,7 @@ TEST(StmtTest, ArrayDeclStmtWithInitTest) {
 }
 
 TEST(StmtTest, StructDeclStmtTest) {
-  Scope S(C); // Local scope
+  FuncScope S(C); // Local scope
   auto *Str = S.def_struct("Str")->get_struct();
   Str->def_member("field1", C.type_int());
   Str->def_member("field2", C.type_int());
@@ -145,7 +145,7 @@ TEST(StmtTest, SwitchStmtTest) {
 }
 
 TEST(StmtTest, SeqTest) {
-  Scope S(C); // Local scope
+  FuncScope S(C); // Local scope
   auto *S1 = S.stmt_raw("stmt1;");
   auto *S2 = S.stmt_raw("stmt2;");
   EXPECT_EQ(S.to_string(), "stmt1;stmt2;");

@@ -57,7 +57,7 @@ void TypedefDecl::emit_impl(std::ostream &SS) {
   }
 }
 
-Scope *FuncDecl::get_or_add_body() {
+FuncScope *FuncDecl::get_or_add_body() {
   if (!Body) {
     Body = C.add_scope();
   }

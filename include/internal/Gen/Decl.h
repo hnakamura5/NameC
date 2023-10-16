@@ -98,7 +98,7 @@ protected:
   std::string Name;
   std::vector<VarDecl *> Params;
   // Empty for declaration
-  Scope *Body = nullptr;
+  FuncScope *Body = nullptr;
   bool IsVarArg;
 
   bool IsExtern = false;
@@ -115,7 +115,7 @@ public:
   IteratorRange<param_iterator> params() {
     return IteratorRange<param_iterator>(Params.begin(), Params.end());
   }
-  Scope *get_or_add_body();
+  FuncScope *get_or_add_body();
   void set_extern(bool IsExtern) { this->IsExtern = IsExtern; }
   bool is_extern() { return IsExtern; }
   void set_static(bool IsStatic) { this->IsStatic = IsStatic; }
@@ -139,7 +139,7 @@ public:
     get_or_add_body();
   }
   bool is_split_definition() override { return true; }
-  Scope *get_body() { return get_or_add_body(); }
+  FuncScope *get_body() { return get_or_add_body(); }
 
 protected:
   void emit_impl(std::ostream &SS) override;

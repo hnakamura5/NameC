@@ -17,7 +17,7 @@ using namespace namec_util;
 namespace namec {
 class CFile;
 class Context;
-class Scope;
+class FuncScope;
 class MacroFuncScope;
 class Expr;
 class Stmt;

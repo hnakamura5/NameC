@@ -36,7 +36,7 @@ protected:
 };
 
 // Scope is for normal scope, such as function body, if body, etc.
-class Scope : public Emit,
+class FuncScope : public Emit,
               public DirectiveDefineMixin,
               public UbiquitousDeclStmtMixin,
               public InFunctionStmtMixin {
@@ -51,10 +51,10 @@ protected:
   virtual void on_add_stmt(Stmt *S) override { Entries.push_back(S); }
 
 public:
-  Scope(Context &C)
+  FuncScope(Context &C)
       : C(C), DirectiveDefineMixin(C), UbiquitousDeclStmtMixin(C),
         InFunctionStmtMixin(C) {}
-  virtual ~Scope() {}
+  virtual ~FuncScope() {}
   void emit_impl(std::ostream &SS) override;
 };
 

@@ -39,20 +39,20 @@ protected:
 
 class IfStmt : public Stmt {
   Expr *Cond;
-  Scope *Then;
-  std::vector<std::pair<Expr *, Scope *>> Elseifs;
-  Scope *Else = nullptr;
+  FuncScope *Then;
+  std::vector<std::pair<Expr *, FuncScope *>> Elseifs;
+  FuncScope *Else = nullptr;
 
 public:
   IfStmt(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Then(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_then() { return Then; }
-  Scope *add_elseif(Expr *Cond) {
+  FuncScope *get_then() { return Then; }
+  FuncScope *add_elseif(Expr *Cond) {
     auto S = C.add_scope();
     Elseifs.push_back({Cond, S});
     return S;
   }
-  Scope *get_or_add_else() {
+  FuncScope *get_or_add_else() {
     if (!Else) {
       Else = C.add_scope();
     }
@@ -66,13 +66,13 @@ protected:
 
 class WhileStmt : public Stmt {
   Expr *Cond;
-  Scope *Body;
+  FuncScope *Body;
 
 public:
   WhileStmt(Context &C, Expr *Cond)
       : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -82,7 +82,7 @@ class ForStmt : public Stmt {
   std::unique_ptr<Stmt> Init;
   Expr *Cond;
   Expr *Step;
-  Scope *Body;
+  FuncScope *Body;
 
 public:
   ForStmt(Context &C, std::unique_ptr<Stmt> Init, Expr *Cond, Expr *Step)
@@ -92,7 +92,7 @@ public:
   Stmt *get_init() { return Init.get(); }
   Expr *get_cond() { return Cond; }
   Expr *get_step() { return Step; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -100,23 +100,23 @@ protected:
 
 class DoStmt : public Stmt {
   Expr *Cond;
-  Scope *Body;
+  FuncScope *Body;
 
 public:
   DoStmt(Context &C, Expr *Cond) : Stmt(C), Cond(Cond), Body(C.add_scope()) {}
   Expr *get_cond() { return Cond; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
 };
 
 class BlockStmt : public Stmt {
-  Scope *S;
+  FuncScope *S;
 
 public:
   BlockStmt(Context &C) : Stmt(C), S(C.add_scope()) {}
-  Scope *get_scope() { return S; }
+  FuncScope *get_scope() { return S; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
@@ -187,7 +187,7 @@ protected:
 
 class CaseStmt : public Stmt {
   Expr *Val; //  nullptr for default
-  Scope *Body;
+  FuncScope *Body;
   bool IsFallThrough;
 
 public:
@@ -196,7 +196,7 @@ public:
   Expr *get_val() { return Val; }
   bool is_default() { return Val == nullptr; }
   bool is_fall_through() { return IsFallThrough; }
-  Scope *get_body() { return Body; }
+  FuncScope *get_body() { return Body; }
 
 protected:
   void emit_impl(std::ostream &SS) override;
