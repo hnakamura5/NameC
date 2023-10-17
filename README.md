@@ -9,11 +9,13 @@ Note that this library does not aim at supporting complete and sound APIs for C/
 
 ## Installation by CMake
 
-Build and installation is by basic CMake workflow. The documents are generated when CMlllllll find doxygen (Sure when in your path env).
+- Build and installation is by standard CMake workflow.
+- You need C++ compiler that supports C++17.
+- The documents are generated when CMake find doxygen (Sure when in your path env).
 
 ## Getting started
 
-- Link the library file lib/NameC.lib
+- Link the library file lib/NameC.lib from the installation.
 - Include the header include/NameC.h for C code generation. It provides the namespace namec.
 - Include the header include/NameCXX.h for C++ code generation. It provides the namespace namecxx.
 - Read the doxygen documentation in doc directory in the release build. Top pages of each namespace works as index.
