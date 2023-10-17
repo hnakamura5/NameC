@@ -215,7 +215,6 @@ protected:
 public:
   BuiltinTypeAPIMixin(Context &C) : C(C) { VoidSingleton.reset(new Void()); }
   RawType *type_raw(std::string Val) { return get_or_add_raw_type(Val); }
-  RawType *type_auto() { return get_or_add_raw_type("auto"); }
   RawType *type_char() { return get_or_add_raw_type("char"); }
   RawType *type_uchar() { return get_or_add_raw_type("unsigned char"); }
   RawType *type_short() { return get_or_add_raw_type("short"); }

@@ -13,9 +13,65 @@ static_assert(false, "Cyclic include detected of " __FILE__);
 namespace namecxx {
 class UbiquitousDeclStmtMixin;
 
-// Context manage Scope, Decl and Expr heap existence. Stmt are kept in Scope.
-// This also exists to eliminate complex circular dependency between Scope,
-// Decl, Stmt and Expr.
+/**
+  @brief Context is global heap manager, and also a factory for types,
+  expressions and QualName.
+
+  QualName is used to represent C++ qualified name, used to define some entities
+and also used in expressions.
+
+  This create and holds ownership of types and expressions used independently
+  from the specific location in TopLevel or Scopes. Stmt are kept in Scopes.
+
+ ## Short form expression factory methods
+
+  There are short form factory for frequently used expressions. These methods
+are inherited from ShortFormExprAPIMixin.
+
+  The difference from normal factory methods is, Short form ensures operator
+  association by inserting parentheses.
+
+  @li VAR() : Short form for variable declaration.
+  @li EX() : Short form for raw literals, variable names, and unary/binary
+operations.
+  @li STR() : string literal.
+  @li CALL() : function call.
+  @li IDX() : array subscript.
+  @li and some other expr_* methods.
+
+  There is short cut for QualName in namecxx.
+
+  @li QN() : QualName factory. This can make QualName from mixes of
+std::string, QualName and Decl
+
+  @note Attention to dispatching and grotesque errors from template!
+
+  ## Examples
+  Let C be a Context object.
+
+  ### Lambda Expression
+
+  Creating LambdaExpr object by expr_lambda. It has FuncScope as body.
+
+  ```cpp
+  auto *I = C.VAR("i", C.type_int())
+  auto *Cap = C.EX("cap");
+  auto *Ref = C.EX("ref");
+  auto *L = C.expr_lambda({Cap, C.EX("&", Ref)}, {I})->get_body();
+  L->stmt_assign(Ref, I);
+  L->stmt_return(C.EX(I, "+", Cap));
+  ```
+
+  then L can be used as the expression passed to statements of,
+
+  ```cpp
+  [cap, &ref](int i){
+    ref = i;
+    return i + cap;
+  }
+  ```
+
+ */
 class Context
     : public LiteralExprAPIMixin<Context, Expr, RawExpr>,
       public CommonBasicExprAPIMixin<Context, Expr, UnaryOp, BinaryOp,
@@ -293,7 +349,6 @@ public:
   TypeAlias *type_typedef(QualName Name, Type *Ty) {
     return add_type(new TypeAlias(Name, Ty));
   }
-
   Named *type_var(VarDecl *D) { return type_name(D); }
   Named *type_name(Decl *D) {
     if (auto P = NamedTypeMap.find(D); P != NamedTypeMap.end()) {
@@ -333,6 +388,7 @@ public:
   }
 
   // C++ specific.
+  RawType *type_auto() { return type_raw("auto"); }
   Class *type_class(QualName Name,
                     std::vector<std::pair<AccessSpec, Type *>> Bases = {},
                     bool IsStruct = false) {

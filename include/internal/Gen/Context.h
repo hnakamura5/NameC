@@ -21,6 +21,7 @@ class UbiquitousDeclStmtMixin;
   circular dependency between Scope, Decl, Stmt and Expr.
 
  ## Short form expression factory methods
+
   There are short form factory for frequently used expressions. These methods
 are inherited from ShortFormExprAPIMixin.
 
@@ -38,6 +39,7 @@ operations.
   @note Attention to dispatching and grotesque errors from template!
 
   ## Examples
+
   Let C be a Context object.
 
   ### Binary Operation
@@ -151,6 +153,7 @@ private:
 
   // Expr factory APIs (and VarDecl API)
 public:
+  /// @brief This is used
   VarDecl *decl_var(std::string Name, Type *T, Expr *Init = nullptr) {
     return add_decl(new VarDecl(Name, T, Init));
   }

@@ -100,7 +100,6 @@ TEST(ExprTest, LambdaExprTest) {
   auto *Lambda =
       C.expr_lambda({C.expr_raw("copy"), C.expr_addr(C.expr_raw("ref"))}, {X},
                     true, C.type_int());
-
   Lambda->get_body()->stmt_return(
       C.expr_binary("+", C.expr_var(X), C.expr_int(1)));
   EXPECT_EQ(Lambda->to_string(), "[copy,&ref](int x,...)->int{return x+1;}");

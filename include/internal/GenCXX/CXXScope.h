@@ -11,7 +11,11 @@ static_assert(false, "Cyclic include detected of " __FILE__);
 #include "internal/GenCXX/CXXMixins.h"
 
 namespace namecxx {
-
+/**
+  @brief CXXFile TopLevel. This can have preprocessor directives and namespace,
+  class, other types and function definitions. One CXXFile can have multiple
+  TopLevel in #if branches, and even you can split anywhere.
+ */
 class TopLevel : public Emit,
                  public DirectiveDefineMixin,
                  public UbiquitousDeclStmtMixin,
@@ -57,6 +61,10 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+/**
+  @brief FuncScope is for normal scope, such as function body, if body, etc.
+  This can have directives, type declarations, statements.
+ */
 class FuncScope : public Emit,
                   public DirectiveDefineMixin,
                   public InFunctionStmtMixin,
@@ -81,6 +89,10 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+/**
+  @brief MacroFuncScope is only as the toplevel scope of a macro function. Here
+  directives are not allowed.
+ */
 class MacroFuncScope : public Emit,
                        public UbiquitousDeclStmtMixin,
                        public InFunctionStmtMixin {
@@ -100,6 +112,10 @@ protected:
   void emit_impl(std::ostream &SS) override;
 };
 
+/**
+  @brief ClassTopLevel is toplevel in class/struct/union definition. This can
+  have directives, type declarations, member definitions.
+ */
 class ClassTopLevel : public Emit,
                       public DirectiveDefineMixin,
                       public UbiquitousDeclStmtMixin,
