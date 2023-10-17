@@ -31,6 +31,31 @@ TEST(FileTest, FileOutPut) {
   std::filesystem::remove(P);
 }
 
+TEST(FileTest, HelloWorld) {
+  CFile F(C);
+  TopLevel *T = F.get_first_top_level();
+  T->include_sys("stdio.h");
+  VarDecl *ArgC = C.decl_var("argc", C.type_int());
+  VarDecl *ArgV = C.decl_array_var("argv", C.type_ptr(C.type_char()), {});
+  FuncScope *Main =
+      T->def_func("main", C.type_int(), {ArgC, ArgV})->get_or_add_body();
+  IfStmt *If = Main->stmt_if(C.EX(C.EX(ArgC), ">", C.EX(1)));
+  FuncScope *Then = If->get_then();
+  FuncScope *Else = If->get_or_add_else();
+  Then->stmt_call(C.EX("printf"), {C.STR("Hello, %s!\\n"), C.IDX(ArgV, 1)});
+  Else->stmt_call(C.EX("printf"), {C.STR("Hello, world!\\n")});
+  Main->stmt_return(C.EX(0));
+  EXPECT_EQ(F.to_string(), "\n#include <stdio.h>\n\n"
+                           "int main(int argc,char* argv[]){"
+                           "if(((argc)>(1))){"
+                           "printf(\"Hello, %s!\\n\",(argv[1]));"
+                           "}else{"
+                           "printf(\"Hello, world!\\n\");"
+                           "}"
+                           "return 0;"
+                           "}\n\n");
+}
+
 TEST(FileTest, VarArgFunc) {
   CFile F(C);
   auto *T = F.get_first_top_level();

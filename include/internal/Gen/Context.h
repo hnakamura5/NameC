@@ -122,10 +122,7 @@ private:
   // Decl factory APIs. Not public to user. Intended to be used by internal
   // VarInitialize in File and Scope.
   RawDecl *decl_raw(std::string Val) { return add_decl(new RawDecl(Val)); }
-  ArrayVarDecl *decl_array_var(std::string Name, Type *T,
-                               std::vector<Expr *> Size, Expr *Init = nullptr) {
-    return add_decl(new ArrayVarDecl(Name, T, Size, Init));
-  }
+
   FuncDecl *decl_func(std::string Name, Type *RetTy,
                       std::vector<VarDecl *> Params, bool IsVarArgs = false) {
     return add_decl(new FuncDecl(*this, Name, RetTy, Params, IsVarArgs));
@@ -156,6 +153,10 @@ public:
   /// @brief This is used
   VarDecl *decl_var(std::string Name, Type *T, Expr *Init = nullptr) {
     return add_decl(new VarDecl(Name, T, Init));
+  }
+  ArrayVarDecl *decl_array_var(std::string Name, Type *T,
+                               std::vector<Expr *> Size, Expr *Init = nullptr) {
+    return add_decl(new ArrayVarDecl(Name, T, Size, Init));
   }
   RawExpr *expr_true() { return expr_raw("1"); }
   RawExpr *expr_false() { return expr_raw("0"); }

@@ -137,10 +137,6 @@ private:
   // Decl factory APIs. Not public to user. Intended to be used by internal
   // VarInitialize in File and Scope.
   RawDecl *decl_raw(std::string Val) { return add_decl(new RawDecl(Val)); }
-  ArrayVarDecl *decl_array_var(QualName Name, Type *T, std::vector<Expr *> Size,
-                               Expr *Init = nullptr) {
-    return add_decl(new ArrayVarDecl(Name, T, Size, Init));
-  }
   FuncDecl *decl_func(QualName Name, Type *RetTy, std::vector<VarDecl *> Params,
                       bool IsVarArgs = false) {
     return add_decl(new FuncDecl(*this, Name, RetTy, Params, IsVarArgs));
@@ -273,6 +269,10 @@ private:
 public:
   VarDecl *decl_var(QualName Name, Type *T, Expr *Init = nullptr) {
     return add_decl(new VarDecl(Name, T, Init));
+  }
+  ArrayVarDecl *decl_array_var(QualName Name, Type *T, std::vector<Expr *> Size,
+                               Expr *Init = nullptr) {
+    return add_decl(new ArrayVarDecl(Name, T, Size, Init));
   }
   VarTemplateDecl *decl_var_template(QualName Name,
                                      std::vector<VarDecl *> TemplateParams,
